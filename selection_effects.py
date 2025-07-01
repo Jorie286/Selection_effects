@@ -15,43 +15,44 @@ inputs = input("Enter input separated by spaces as follows: \nSurvey_Name Lumino
 
 # take care of the error handling for the user inputs to make sure all are valid before we start computation
 while True: # check to make sure enough inputs where given
-    try:
-        input_list = inputs.split() # inputs should be separated by spaces, split them into a list
-        if len(input_list)!= 3:
-            print("Error: not enough inputs given! Please try again. Expected 3 but got", len(input_list))
-            inputs = input()
+    input_list = inputs.split(" ") # inputs should be separated by spaces, split them into a list
+    if len(input_list)!= 3:
+        print("Error: not enough inputs given! Please try again. Expected 3 but got", len(input_list))
+        inputs = input()
+    else:
         break
 
 # get the inputs in separate variables for easier error handling and use later
 survey_name = input_list[0]
-luinosity = input_list[1]
+luminosity = input_list[1]
 pulsar_data = input_list[2]
 
 # do error checking on the inputs and get them corrected if necessary
 while True:
-    try: # check to make sure that the given survey name exsists in the surv_array
-        s = survey.surv_array[np.where(survey.surv_array[0] == survey_name)] # get the row of data for the specific survey
-        break
-    except TypeError:
-        print("Error: Survey name is not a string.")
-        print("Use one of the following:")
-        print(survey.surv_array[0])
-        survey_name=input()
-    except Exception as e: # try a different input if the first survey name did not work
+    if str(survey_name) not in survey.surv_array[:, 0]:
         print("Error: Survey name does not match one that is avaiable.")
         print("Use one of the following:")
-        print(survey.surv_array[0])
+        print(survey.surv_array[:, 0])
         survey_name=input()
+    else:
+        if len(np.where(survey.surv_array[:, 0] == str(survey_name))[0])!=1:
+            print("Which version of the survey would you like? Choose one of the following array indicies:")
+            print(np.where(survey.surv_array[:, 0] == str(survey_name))[0])
+            n = input()
+            s = survey.surv_array[int(n)]
+        else:
+            s = survey.surv_array[np.where(survey.surv_array[:, 0] == str(survey_name))] # get the row of data for the specific survey
+        break
 
 while True:
     try:
         L = float(luminosity)
         if np.log(L)<-3 or np.log(L)>4:
-            raise ValueError("Error: Luminosity is outside of accepted range. -3<= log(L) <= 4")
+            print("Error: Luminosity is outside of accepted range. -3<= log(L) <= 4")
             print("Please try again.")
             luminosity = input()
         break
-    except TypeError:
+    except ValueError:
         print("Error: Invalid entry for luminosity, it must be of type float. Please try again.")
         luminosity=input()
 
@@ -61,7 +62,7 @@ while True:
         p = np.fromfile(pulsar_data, dtype=np.float64) # load the pulsar data in as an array
         break
     except Exception as e:
-        print("Error: invalid entry fro pulsar data file name, please try again.")
+        print("Error: invalid entry for pulsar data file name, please try again.")
         pulsar_data = input()
 
 print("All inputs successfuly processed!")
@@ -264,4 +265,3 @@ for i, row in pulsar_data.iterrows:
 
 # save the updated pulsar_data to a new csv file
 pulsar_data.to_csv("pulsar_data_updated.csv", index=False)
-
