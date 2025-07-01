@@ -4,8 +4,10 @@
 import numpy as np
 import math
 import uconst
+import galpy
 
 #Calculate l, b, distance of pulsar to the Sun. R0_Kpc is the distance Sun-Center of Galaxy, in Kpc, as defined in uconst.py
+# NOTE: some of these conversions will need to be checked to see if they are sun centered or galactocentric!!!
 
 def cart2gal(x, y, z):
     """
@@ -22,29 +24,10 @@ def cart2gal(x, y, z):
         d, galactic d (distance) coordinate
     """
 
-    # printf("cart2gal called with x=%3.3f, y=%3.3f, z=%3.3f\n", %(x, y, z))
-
-    dx = uconst.R0_Kpc - x
-    dxy = np.sqrt(dx * dx + y *y)
-
-    l = 180.0 / np.pi * float(np.arctan2((-1.0)*y, dx))
-
-    b = 180.0 / np.pi * float(np.arctan2(z, dxy))
-
-    d = np.sqrt(dx * dx + y * y + z * z)
-
-
-    l_before = l
-    # reduce l to [0, 360)
-    l = l - 360.0 * math.floor(l/360) # check !!!!
-
-    # if l == 360:
-    #     printf("l = 360 after reducing it!!! l_before=%3.3f\n", l_before)
-    # while l = -0.000008:
-    #     print("We get 360!!!")
-    # We may not need the following line!
-    if (l==360):
-        l=0
+    lbd = galpy.util.coords.XYZ_to_lbd(x, y, z)
+    l = lbd[0]
+    b = lbd[1]
+    d = lbd[2]
 
     return l, b, d
 
@@ -63,47 +46,77 @@ def gal2cart(l, b, d, x, y, z):
         z, cartisian z cooordinate
     """
 
-    R0 = 8.5
-
-    # check l and b
-    if l < 0 or l >= 360 or math.fabs(b) > 90:
-        printf("ERROR: gal2cart():\n")
-        printf("ERROR: l=%3.3f, b=%3.3f\n", % (l, b))
-        printf("ERROR: l should be inside [0, 360) deg, b should be inside [-90, 90] deg.\n")
-        break
-
-    x = uconst.R0_Kpc - d * np.cos(b * np.pi / 180) * np.cos(l * np.pi / 180)
-    y = -d * np.cos(b * np.pi / 180) * np.sin(l * np.pi / 180)
-    z = d * np.sin(b * np.pi / 180)
+    xyz = galpy.util.coords.lbd_to_XYZ(l, b, d)
+    x = xyz[0]
+    y = xyz[1]
+    z = xyz[2]
 
     return x, y, z
 
-def gal_dot(l, b, d, vx, vy, vz, ldot, bdot):
+def gal_dot(l, b, d, vx, vy, vz):
     """
     Given the galactic coordinates (l, b, d) and the velocities in cartisian coordinates (vx, vy, vz), calculate the velociy in the l and b galactic coordinate (ldot, bdot).
 
     Input:
         l, galactic l (longitude) coordinate
         b, galactic b coordinate
-        d, galactic d (distance) coordinate
-        vx, velocity in cartisian x coordinate
-        vy, velocity in cartisian y coordinate
-        vz, velocity in cartisian z coordinate
+        d, galactic d (distance) coordinate (kpc)
+        vx, velocity in cartisian x coordinate (km/s)
+        vy, velocity in cartisian y coordinate (km/s)
+        vz, velocity in cartisian z coordinate (km/s)
 
     Returns:
-        ldot, change in (velocity of) galactic l coordinate
-        bdot, change in (velocity of) galactic b coordinate
+        vr, line of sight velocity (km/s)
+        ldot_cosb, change in (velocity of) galactic l coordinate (mas/yr)
+        bdot, change in (velocity of) galactic b coordinate (mas/yr)
     """
 
-    # check l and b
-    if l < 0 or l >= 360 or fabs(b) > 90: # Check!!!!
-        printf("ERROR: gal2cart():\n")
-        printf("ERROR: l=%3.3f, b=%3.3f\n", % (l, b))
-        printf("ERROR: l should be inside [0, 360) deg, b should be inside [-90, 90] deg.\n")
-        break
+    r = galpy.util.coords.vxvyvz_to_vrpmllpmbb(vx, vy, vz, l, b, d)
+    vr = r[0]
+    ldot_cosb = r[1]
+    bdot = r[2]
 
-    factor = (21.0 / 100.0) / d
-    ldot = factor * (-np.sin(l * np.pi / 180) * vx + np.cos(l* np.pi / 180) * vy)
-    bdot = factor * (-np.sin(b * np.pi / 180) * np.cos(l* np.pi / 180) * vx - np.sin(b * np.pi / 180) * np.sin(l * np.pi / 180) * vy + np.cos(b * np.pi / 180) * vz)
+    return r, ldot_cosb, bdot
 
-    return ldot, bdot
+
+def gal2eq(l, b): # NOTE: there may be a galpy function avaliable for this!!
+    """
+    Convert galatic coordinates to equatorial coordinates.
+
+    2000.0 ???
+
+    Calculate l, b, distance of pulsar to the Sun. R0_Kpc is the distance Sun-Center of Galaxy, in Kpc, as defined in uconst.py
+
+    Input:
+        l, galactic l (longitude) coordinate
+        b, galactic b coordinate
+
+    Returns:
+        alpha, right ascension angle 0, 2*pi, radians
+        delta, delination angle -pi/2, pi/2, radians
+    """
+
+    # do we need these?????
+    # l_zero = 33 * np.pi / 180
+    # alpha_zero = 282.25 * np.pi / 180
+    # delta_NGP = (27.4) * np.pi / 180
+
+    # 2000.0 values ???
+    l_zero = 32.93 * np.pi / 180
+    alpha_zero = 282.86 * np.pi / 180
+    delta_NGP = (27 + 7.8 / 60) * np.pi /180
+
+    sin_delta = np.sin(b) * np.sin(delta_NGP) + np.cos(b) * np.cos(delta_NGP) * np.sin(l - l_zero)
+
+    delta = np.arcsin(sin_delta)
+
+    caa = np.cos(l - l_zero) * np.cos(b) / np.cos(delta)
+    saa = (-np.sin(b) * np.cos(delta_NGP) + np.cos(b) * np.sin(delta_NGP) * np.sin(l - l_zero)) / np.cos(delta)
+    aa = mymath.arg2PI(caa, saa) # ????
+
+    alpha = aa + alpha_zero
+
+    # because of the previous addition, this needs to be reduced again to [0, 2pi)
+    alpha = alpha - 2 * np.pi * math.floor(alpha/ (2 * np.pi))
+
+    return alpha, delta
