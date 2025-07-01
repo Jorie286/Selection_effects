@@ -3,7 +3,7 @@
 import numpy as np
 import math
 import usconst
-import gal2eq
+import gal_cart
 
 # define an array that includes all of the details of the surveys
 # Field name: name    Trec    recBW(MHz)    n_chan    freq(MHz)    t_samp(s)    gain    t_int(s)    is_covered()
