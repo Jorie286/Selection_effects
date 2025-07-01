@@ -1,65 +1,107 @@
 # equivalent file of a binpuls____.c file
 
-# NOTE: some of these files could be combined, I am keeping them separate for now so that they mirror the .c files better.
-
+# import necessary packages
 import numpy as np
-import math
-import uconst
-import mymath
-import gal2eq
+import scipy.constants as const
+import galpy
+
+# get functions and constants from other files
 import gal_cart
-import fortran_functions
-import seed_from_time
-import misc_functions
-import pulsar
 import survey
-import pulsar_survey_functions
+import uconst
+import selection_effects
 
-NS_USED = 5 # the actual number of surveys used
+# allow the user to input the name of the survey, the luminosity, and the pulsar data file that we want to use
+inputs = input("Enter input separated by spaces as follows: \nSurvey_Name Luminosity Pulsar_Data_File_Name: \n")
 
-def main(argc, *argv):
-    a, e, m1, m2, porb, ce ,p_mer, a_mer, tf, l, p1, pdot, dt, tb, b, step, x, y, z, vx, vy, vz, q, r, area, e0, porb0
-    """
-    Main body of the code.
-
-    Input:
-        a,
-        e,
-        m1,
-        m2,
-        porb,
-        ce,
-        p_mer,
-        a_mer,
-        tf,
-        l,
-        p1,
-        pdot,
-        dt,
-        tb,
-        b,
-        step,
-        x,
-        y,
-        z,
-        vx,
-        vy,
-        vz,
-        q,
-        r,
-        area,
-        e0,
-        porb0,
-
-    Returns:
-
-    """
-    if argc!=4:
-        printf("Wrong usage, you have to pass: input output survey\n")
+# take care of the error handling for the user inputs to make sure all are valid before we start computation
+while True: # check to make sure enough inputs where given
+    input_list = inputs.split(" ") # inputs should be separated by spaces, split them into a list
+    if len(input_list)!= 3:
+        print("Error: not enough inputs given! Please try again. Expected 3 but got", len(input_list))
+        inputs = input()
+    else:
         break
 
-    with open(argv[1], "r") as in_file:
-        data = in_file.read()
+# get the inputs in separate variables for easier error handling and use later
+survey_name = input_list[0]
+luminosity = input_list[1]
+pulsar_data = input_list[2]
 
-    with open(argv[2], "w") as out_file: # put this at the end of the function to output the results to a file
+# do error checking on the inputs and get them corrected if necessary
+while True:
+    if str(survey_name) not in survey.surv_array[:, 0]:
+        print("Error: Survey name does not match one that is avaiable.")
+        print("Use one of the following:")
+        print(survey.surv_array[:, 0])
+        survey_name=input()
+    else:
+        if len(np.where(survey.surv_array[:, 0] == str(survey_name))[0])!=1:
+            print("Which version of the survey would you like? Choose one of the following array indicies:")
+            print(np.where(survey.surv_array[:, 0] == str(survey_name))[0])
+            n = input()
+            s = survey.surv_array[int(n)]
+        else:
+            s = survey.surv_array[np.where(survey.surv_array[:, 0] == str(survey_name))] # get the row of data for the specific survey
+        break
 
+while True:
+    try:
+        L = float(luminosity)
+        if np.log(L)<-3 or np.log(L)>4:
+            print("Error: Luminosity is outside of accepted range. -3<= log(L) <= 4")
+            print("Please try again.")
+            luminosity = input()
+        break
+    except ValueError:
+        print("Error: Invalid entry for luminosity, it must be of type float. Please try again.")
+        luminosity=input()
+
+while True:
+    try:
+        # NOTE: this will need to be changed depending on the type of file that we end up loading.
+        p = np.fromfile(pulsar_data, dtype=np.float64) # load the pulsar data in as an array
+        break
+    except Exception as e:
+        print("Error: invalid entry for pulsar data file name, please try again.")
+        pulsar_data = input()
+
+print("All inputs successfuly processed!")
+
+tsky1 = np.fromfile('tsky1.o', dtype=np.float64) # get the sky temperatures from the file
+
+# NOTE: In what format do we want to save the data? The end of this file should be changed depending on the answer!!!
+# create empty rows to store new data in (for dataframe ???)
+pulsar_data["flux"] = None
+pulsar_data["S_min"] = None
+pulsar_data["is_detectable"] = None
+pulsar_data["f_beaming"] = None
+
+# iterate through each row of the simulated pulsar data and determine if the pulsar is detectable
+for i, row in pulsar_data.iterrows:
+
+    # compute S_min and flux
+    S_min, flux = selection_effects.S_min(row, s, L)
+
+    # get the galactic coordinates of the pulsar
+    l, b, d = gal_cart.cart2gal(row['x'], row['y'], row['z'])
+
+    if survey.s[-1](l, b)==1: # check to see if the pulsar is within the survey's viewing area. If it is, save the info.
+        if flux >= S_min: # save info on whether or not the simulated pulsar would be detectable with the given survey as well as its flux and S_min
+            pulsar_data["flux"][i] = flux
+            pulsar_data["S_min"][i] = S_min
+            pulsar_data["is_detectable"][i] = True
+            pulsar_data["f_beaming"][i] = selection_effects.f_beaming(row)
+        else:
+            pulsar_data["flux"][i] = flux
+            pulsar_data["S_min"][i] = S_min
+            pulsar_data["is_detectable"][i] = False
+            pulsar_data["f_beaming"][i] = selection_effects.f_beaming(row)
+    else: # If the pulsar is not in the viewing area, don't save any info other than that it is not detectable
+        pulsar_data["flux"][i] = None
+        pulsar_data["S_min"][i] = None
+        pulsar_data["is_detectable"][i] = False
+        pulsar_data["f_beaming"][i] = None
+
+# save the updated pulsar_data to a new csv file
+pulsar_data.to_csv("pulsar_data_updated.csv", index=False)
