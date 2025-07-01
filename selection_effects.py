@@ -1,74 +1,12 @@
-# radio selection effects complete script
+# radio selection effects functions
 
 # import necessary packages
 import numpy as np
 import scipy.constants as const
-import galpy
 
 # get functions and constants from other files
 import gal_cart
 import survey
-import uconst
-
-# allow the user to input the name of the survey, the luminosity, and the pulsar data file that we want to use
-inputs = input("Enter input separated by spaces as follows: \nSurvey_Name Luminosity Pulsar_Data_File_Name: \n")
-
-# take care of the error handling for the user inputs to make sure all are valid before we start computation
-while True: # check to make sure enough inputs where given
-    input_list = inputs.split(" ") # inputs should be separated by spaces, split them into a list
-    if len(input_list)!= 3:
-        print("Error: not enough inputs given! Please try again. Expected 3 but got", len(input_list))
-        inputs = input()
-    else:
-        break
-
-# get the inputs in separate variables for easier error handling and use later
-survey_name = input_list[0]
-luminosity = input_list[1]
-pulsar_data = input_list[2]
-
-# do error checking on the inputs and get them corrected if necessary
-while True:
-    if str(survey_name) not in survey.surv_array[:, 0]:
-        print("Error: Survey name does not match one that is avaiable.")
-        print("Use one of the following:")
-        print(survey.surv_array[:, 0])
-        survey_name=input()
-    else:
-        if len(np.where(survey.surv_array[:, 0] == str(survey_name))[0])!=1:
-            print("Which version of the survey would you like? Choose one of the following array indicies:")
-            print(np.where(survey.surv_array[:, 0] == str(survey_name))[0])
-            n = input()
-            s = survey.surv_array[int(n)]
-        else:
-            s = survey.surv_array[np.where(survey.surv_array[:, 0] == str(survey_name))] # get the row of data for the specific survey
-        break
-
-while True:
-    try:
-        L = float(luminosity)
-        if np.log(L)<-3 or np.log(L)>4:
-            print("Error: Luminosity is outside of accepted range. -3<= log(L) <= 4")
-            print("Please try again.")
-            luminosity = input()
-        break
-    except ValueError:
-        print("Error: Invalid entry for luminosity, it must be of type float. Please try again.")
-        luminosity=input()
-
-while True:
-    try:
-        # NOTE: this will need to be changed depending on the type of file that we end up loading.
-        p = np.fromfile(pulsar_data, dtype=np.float64) # load the pulsar data in as an array
-        break
-    except Exception as e:
-        print("Error: invalid entry for pulsar data file name, please try again.")
-        pulsar_data = input()
-
-print("All inputs successfuly processed!")
-
-tsky1 = np.fromfile('tsky1.o', dtype=np.float64) # get the sky temperatures from the file
-
 
 # now that any errors should be fixed, define functions that we will need to determine the selection effects
 def DM_fnct(x, y, z):
@@ -228,40 +166,3 @@ def f_beaming(p):
     if f_b>1 or f_b<0: # check to make sure that the beaming fraction is in the range that it should be within
         print("Error: beaming fraction is not within parameters. f_b =", f_b)
     return f_b
-
-
-# NOTE: In what format do we want to save the data? The end of this file should be changed depending on the answer!!!
-# create empty rows to store new data in (for dataframe ???)
-pulsar_data["flux"] = None
-pulsar_data["S_min"] = None
-pulsar_data["is_detectable"] = None
-pulsar_data["f_beaming"] = None
-
-# iterate through each row of the simulated pulsar data and determine if the pulsar is detectable
-for i, row in pulsar_data.iterrows:
-
-    # compute S_min and flux
-    S_min, flux = S_min(row, s, L)
-
-    # get the galactic coordinates of the pulsar
-    l, b, d = gal_cart.cart2gal(row['x'], row['y'], row['z'])
-
-    if survey.s[-1](l, b)==1: # check to see if the pulsar is within the survey's viewing area. If it is, save the info.
-        if flux >= S_min: # save info on whether or not the simulated pulsar would be detectable with the given survey as well as its flux and S_min
-            pulsar_data["flux"][i] = flux
-            pulsar_data["S_min"][i] = S_min
-            pulsar_data["is_detectable"][i] = True
-            pulsar_data["f_beaming"][i] = f_beaming(row)
-        else:
-            pulsar_data["flux"][i] = flux
-            pulsar_data["S_min"][i] = S_min
-            pulsar_data["is_detectable"][i] = False
-            pulsar_data["f_beaming"][i] = f_beaming(row)
-    else: # If the pulsar is not in the viewing area, don't save any info other than that it is not detectable
-        pulsar_data["flux"][i] = None
-        pulsar_data["S_min"][i] = None
-        pulsar_data["is_detectable"][i] = False
-        pulsar_data["f_beaming"][i] = None
-
-# save the updated pulsar_data to a new csv file
-pulsar_data.to_csv("pulsar_data_updated.csv", index=False)
