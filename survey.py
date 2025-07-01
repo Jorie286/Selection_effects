@@ -7,41 +7,25 @@ import gal2eq
 
 # define an array that includes all of the details of the surveys
 # Field name: name    Trec    recBW(MHz)    n_chan    freq(MHz)    t_samp(s)    gain    t_int(s)    is_covered()
-surv_array=np.array(["Parkes 70 cm",      60,   32,   256,   436,        0.0003,    0.65, 157,      ic_parkes_70],
-                    ["Parkes Multi Beam", 24,   288,  96,    1374,       0.00025,   0.65, 2100,     ic_parkes_mb,
-                    ["Swin Interm Lat",   24,   288,  96,    1374,       0.000125,  0.65, 265,      ic_swin_il],
-                    ["Swin Extended",     24,   288,  96,    1374,       0.000125,  0.65, 265,      ic_swin_ext],
-                    ["Burgay et al",      24,   288,  96,    1374,       0.000125,  0.65, 265,      ic_burgay],
+surv_array=np.array(["Parkes_70_cm",      60,   32,   256,   436,        0.0003,    0.65, 157,      ic_parkes_70],
+                    ["Parkes_Multi_Beam", 24,   288,  96,    1374,       0.00025,   0.65, 2100,     ic_parkes_mb,
+                    ["Swin_Interm Lat",   24,   288,  96,    1374,       0.000125,  0.65, 265,      ic_swin_il],
+                    ["Swin_Extended",     24,   288,  96,    1374,       0.000125,  0.65, 265,      ic_swin_ext],
+                    ["Burgay_et_al",      24,   288,  96,    1374,       0.000125,  0.65, 265,      ic_burgay],
                     ["GMRT",              90,   32,   512,    610,       0.000125,  0.65*15*(45.0/64.0*45.0/64.0), 300, ic_gmrt],
-                    ["Parkes Multi Beam ALLSKY", 24,   288,  96,    1374,       0.00025,   0.65, 2100,     ic_all_sky],
-                    ["Parkes Multi Beam part", 24,   288,  96,    1374,       0.00025,   0.65, 2100,     ic_part_sky],
+                    ["Parkes_Multi_Beam_ALLSKY", 24,   288,  96,    1374,       0.00025,   0.65, 2100,     ic_all_sky],
+                    ["Parkes_Multi_Beam_part", 24,   288,  96,    1374,       0.00025,   0.65, 2100,     ic_part_sky],
                     ["MeerKat",           18, 800, 1024, 1400, 0.000064, 2.8, 2100, ic_all_sky_MeerSKA],
                     ["SKA",               30, 300, 1024, 1400, 0.000064, 8.4, 2100, ic_all_sky_MeerSKA],
-                    ["MeerKat GalPl", 18, 800, 1024, 1400, 0.000064, 2.8, 2100, ic_GalPlane_MeerSKA],
-                    ["MeerKat tint", 18, 800, 1024, 1400, 0.000064, 2.8, 300, ic_all_sky_MeerSKA],
-                    ["MeerKat Galpl tint", 18, 800, 1024, 1400, 0.000064, 2.8, 300, ic_GalPlane_MeerSKA]#,
-                    #["Lowlat", 23, 340, 870,1240 ,0.000256, 0.65, 4320, ic_lowlat]
-                    #["TRUMP_Meer", 18, 400, 1024, 1400, 0.000064, 1.83, 637, ic_TRUMP_Meer]
-
-                       )
-#["MeerKat", 18, 800, 1024, 1400, 0.000064, 2.8, 2100, ic_all_sky_MeerSKA ]
-#["SKA",     30, 300, 1024, 1400, 0.000064, 8.4, 2100, ic_all_sky_MeerSKA ]
-#["MeerKat", 18, 800, 1024, 1400, 0.000064, 2.8, 300, ic_GalPlane_MeerSKA ]
-#["SKA",     30, 300, 1024, 1400, 0.000064, 8.4, 300, ic_GalPlane_MeerSKA ])
-
-def DM0_fnct(s):
-    """
-    Input:
-        s, row index of desired survey
-
-    Returns:
-        dm0
-    """
-
-    wavelength=Clight/(surv_array[s].frequency*1e6)
-    # printf("wavelength=%f\n", wavelength)
-    dm0 = 1000.0 *surv_array[s].t_samp*pow(3e2/wavelength, 3)/(8.3e6*(surv_array[s].receiverBW/surv_array[s].nchan))
-    return dm0
+                    ["MeerKat_GalPl", 18, 800, 1024, 1400, 0.000064, 2.8, 2100, ic_GalPlane_MeerSKA],
+                    ["MeerKat_tint", 18, 800, 1024, 1400, 0.000064, 2.8, 300, ic_all_sky_MeerSKA],
+                    ["MeerKat_Galpl_tint", 18, 800, 1024, 1400, 0.000064, 2.8, 300, ic_GalPlane_MeerSKA],
+                    ["Lowlat", 23, 340, 870,1240 ,0.000256, 0.65, 4320, ic_lowlat],
+                    ["TRUMP_Meer", 18, 400, 1024, 1400, 0.000064, 1.83, 637, ic_TRUMP_Meer],
+                    ["MeerKat", 18, 800, 1024, 1400, 0.000064, 2.8, 2100, ic_all_sky_MeerSKA ],
+                    ["SKA",     30, 300, 1024, 1400, 0.000064, 8.4, 2100, ic_all_sky_MeerSKA ],
+                    ["MeerKat", 18, 800, 1024, 1400, 0.000064, 2.8, 300, ic_GalPlane_MeerSKA ],
+                    ["SKA",     30, 300, 1024, 1400, 0.000064, 8.4, 300, ic_GalPlane_MeerSKA ])
 
 # Geometry checking functions  - for each survey
 def ic_parkes_70(l, b):
@@ -58,7 +42,7 @@ def ic_parkes_70(l, b):
     double alpha, delta;
 
     # This survey is defined in equatorial coordinates.
-    alpha, delta = gal2eq.gal2eq(l*np.pi/180, b*np.pi/180)
+    alpha, delta = gal_cart.gal2eq(l*np.pi/180, b*np.pi/180)
     alpha=alpha*12/np.pi
     delta=delta*180/np.pi
     # printf("alpha=%.3lf hours, delta=%.3lf deg\n", alpha,delta)
@@ -113,7 +97,7 @@ def ic_swin_ext(l, b):
     Returns:
         1 or 0 (statement is True or False)
     """
-    if (  ( 15 <= fabs(b) and fabs(b) <= 30 and (  (0 <= l and l <= 50) or (260 <=l and l < 360) ) )):
+    if (  ( 15 <= math.fabs(b) and math.fabs(b) <= 30 and (  (0 <= l and l <= 50) or (260 <=l and l < 360) ) )):
       return 1
    else:
       return 0
@@ -146,7 +130,7 @@ def ic_gmrt(l, b):
         1 or 0 (statement is True or False)
     """
     # This survey is defined in equatorial coordinates.
-    alpha, delta = gal2eq.gal2eq(l*np.pi/180, b*np.pi/180)
+    alpha, delta = gal_cart.gal2eq(l*np.pi/180, b*np.pi/180)
     alpha=alpha*12/np.pi
     delta=delta*180/np.pi
     # printf("alpha=%.3lf hours, delta=%.3lf deg\n", alpha,delta)
@@ -180,7 +164,7 @@ def ic_part_sky(l, b):
 
 def ic_all_sky_MeerSKA(l, b)
     """
-    MeerKat geometry check.
+    MeerKat tint geometry check.
 
     Input:
         l, galactic l (longitude) coordinate
@@ -190,7 +174,7 @@ def ic_all_sky_MeerSKA(l, b)
         1 or 0 (statement is True or False)
     """
     # This survey is defined in equatorial coordinates.
-    alpha, delta = gal2eq.gal2eq(np.pi/180, b*np.pi/180)
+    alpha, delta = gal_cart.gal2eq(np.pi/180, b*np.pi/180)
     alpha=alpha*12/np.pi
     delta=delta*180/np.pi
 
@@ -201,7 +185,7 @@ def ic_all_sky_MeerSKA(l, b)
 
 def ic_GalPlane_MeerSKA(l, b):
     """
-    SKA geometry check.
+    MeerKat Galpl tint geometry check.
 
     Input:
         l, galactic l (longitude) coordinate
@@ -212,7 +196,7 @@ def ic_GalPlane_MeerSKA(l, b):
     """
 
     # This survey is defined in equatorial coordinates.
-    alpha, delta = gal2eq.gal2eq(l*np.pi/180, b*np.pi/180)
+    alpha, delta = gal_cart.gal2eq(l*np.pi/180, b*np.pi/180)
     alpha=alpha*12/np.pi
     delta=delta*180/np.pi
 
