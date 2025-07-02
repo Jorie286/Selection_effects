@@ -1,12 +1,8 @@
 # equivalent file of gal_cart.h and gal_cart.c
 
 # import necessary packages and files
-import numpy as np
-import math
-import uconst
 import galpy
 
-#Calculate l, b, distance of pulsar to the Sun. R0_Kpc is the distance Sun-Center of Galaxy, in Kpc, as defined in uconst.py
 # NOTE: some of these conversions will need to be checked to see if they are sun centered or galactocentric!!!
 
 def cart2gal(x, y, z):

@@ -71,9 +71,7 @@ while True:
 
 print("All inputs successfuly processed!")
 
-tsky1 = np.fromfile('tsky1.o', dtype=np.float64) # get the sky temperatures from the file
 
-# NOTE: In what format do we want to save the data? The end of this file should be changed depending on the answer!!!
 # create empty rows to store new data in (for dataframe ???)
 pulsar_data["flux"] = None
 pulsar_data["S_min"] = None
@@ -85,7 +83,7 @@ pulsar_data["f_beaming"] = None
 for i, row in pulsar_data.iterrows:
 
     # compute S_min and flux
-    S_min, flux = selection_effects.S_min(row, s, L)
+    S_min, flux, SNR = selection_effects.S_min(row, s, L)
 
     # get the galactic coordinates of the pulsar
     l, b, d = gal_cart.cart2gal(row['x'], row['y'], row['z'])
@@ -110,5 +108,6 @@ for i, row in pulsar_data.iterrows:
         pulsar_data["is_detectable"][i] = False
         pulsar_data["f_beaming"][i] = None
 
+# NOTE: In what format do we want to save the data?
 # save the updated pulsar_data to a new csv file
 pulsar_data.to_csv("pulsar_data_updated.csv", index=False)

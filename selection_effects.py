@@ -3,12 +3,14 @@
 # import necessary packages
 import numpy as np
 import scipy.constants as const
+import pygedm
 
 # get functions and constants from other files
 import gal_cart
 import survey
+from skytempy import skytemp
 
-# now that any errors should be fixed, define functions that we will need to determine the selection effects
+
 def DM_fnct(x, y, z):
     """
     Get the dispersion measure of the pulsar.
@@ -16,16 +18,17 @@ def DM_fnct(x, y, z):
     Inputs:
     -------
     x, y, z; cartisian coordinates for the position of the pulsar
+    freq, observing frequency (GHz)
 
     Returns:
     --------
-    DM, the dispersion measure of hte pulsar in the given direction.
+    dm, the dispersion measure of the pulsar in the given direction.
+    tau_sc, scattering timescale at 1 GHz (from pygedm dist_to_dm docs)
     """
 
-    l, b, d = gal_cart.cart2gal(x, y, z)
-    neg_one = -1
-    DM, limit, sm, smtau, smtheta = dmdsm(l, b, neg_one, d)
-    return DM
+    l, b, d = gal_cart.cart2gal(x, y, z) # d needs to be in pc for pygedm function
+    DM, tau_sc = pygedm.dist_to_dm((l, b), dist = d, nu=freq)
+    return DM, tau_sc
 
 def tau_scatt_fnct(DM, freq):
     """
@@ -77,11 +80,20 @@ def T_sky_fnct(x, y, z, freq):
     --------
     T_sky, sky temperature in the direction of the puslar
     """
-    wavelength = const.c / (freq * 1e6) # m
     l, b, d = gal_cart.cart2gal(x, y, z) # galactic coordinates of the puslar
-    tsky400 = tsky1(l, b)  # Sky temperature at 408 MHz NOTE: this line of the function may need to be fixed depending on how the tsky1.o file is formated.
-    lambda_408 = const.c / (408 * 1e6)
-    T_sky = tsky400 * (wavelength / lambda_408) ** 2.8
+    # Sky temperature at 408 MHz
+    s = skytemp.SkyTemp(l, b, '.\\skytempy\\haslam408_ds_Remazeilles2014.fits') # get the skytemp information from the fits file
+    T_sky = s.get_temp(freq) # get the temperature from the output
+
+
+    # funct from skytempy, same as what we where using???
+    # NOTE skytempy funciton: (self.temp408*(freq/408)**spec_ind)
+
+    #wavelength = const.c / (freq * 1e6) # m
+    #tsky400 = tsky1(l, b)
+    #lambda_408 = const.c / (408 * 1e6)
+    #T_sky = tsky400 * (wavelength / lambda_408) ** 2.8
+
     return T_sky
 
 def flux(L, x, y, z):
