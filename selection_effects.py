@@ -84,7 +84,23 @@ def T_sky_fnct(x, y, z, freq):
     T_sky = tsky400 * (wavelength / lambda_408) ** 2.8
     return T_sky
 
-def S_min(p, s, L, npol = 2, beta=1):
+def flux(L, x, y, z):
+    """
+    Compute the flux of the pulsar.
+
+    Input:
+        L, luminosity of the modeled pulsar, an input given by user (Watts ???)
+        p, row of pulsar data from dataframe
+
+    Returns:
+        F, flux of the pulsar (W/Kpc^2)
+    """
+
+    D = np.sqrt(x**2 + y**2 + z**2) # distance to pulsar (Kpc)
+    F = L/(4*np.pi*(D**2)) # flux of the pulsar in (Watts / Kpc^2)
+    return F
+
+def S_min(p, s, L, npol = 2, SNmin = 10, beta=1):
     """
     Compute the minimum flux that a pulsar can have and still be detectable.
 
@@ -93,11 +109,13 @@ def S_min(p, s, L, npol = 2, beta=1):
         s, row number of the survey that we are using (full array is stored in survey.py)
         L, luminosity of the pulsar
         npol, number of polarizations in the detector (automatically set to 2)
+        SNmin, minimum detection threshold (automatically set to 10)
         beta, parameter to account for the errors that increase the noise in the signal (automatically set to 1)
 
     Returns:
         S_min, the lower limit of flux a simulated pulsar can have to be detected at a given S/N ratio
         F, flux of the pulsar (W/kpc^2)
+        SNR, signal to noise ratio of the pulsar
     """
 
     # define each constant in the survey array as what it is for greater readability
@@ -129,25 +147,8 @@ def S_min(p, s, L, npol = 2, beta=1):
         SNR = F / np.sqrt(np.pi / 2) / np.sqrt(We / (P - We)) / (T_rec + T_sky) * (G * np.sqrt(npol * d_f * t_int))
 
     # compute the minimum flux
-    S_min = beta*((SNR*(T_rec+T_sky))/(G*np.sqrt(npol*t_int*(d_f/1e6))))*np.sqrt(W_e/(P-W_e))
-    return S_min, F
-
-def flux(L, x, y, z):
-    """
-    Compute the flux of the pulsar.
-
-    Input:
-        L, luminosity of the modeled pulsar, an input given by user (Watts ???)
-        p, row of pulsar data from dataframe
-
-    Returns:
-        F, flux of the pulsar (W/Kpc^2)
-    """
-
-    D = np.sqrt(x**2 + y**2 + z**2) # distance to pulsar (Kpc)
-    L = . . . # luminosity of the pulsar
-    F = L/(4*np.pi*(D**2)) # flux of the pulsar in (Watts / Kpc^2)
-    return F
+    S_min = beta*((SNmin*(T_rec+T_sky))/(G*np.sqrt(npol*t_int*(d_f/1e6))))*np.sqrt(W_e/(P-W_e))
+    return S_min, F, SNR
 
 def f_beaming(p):
     """
