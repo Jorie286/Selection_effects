@@ -11,6 +11,9 @@ import survey
 import uconst
 import selection_effects
 
+# astrophysical constants
+R0_Kpc=8.5 # Kpc, distance to Sun-Galaxy Center
+
 # allow the user to input the name of the survey, the luminosity, and the pulsar data file that we want to use
 inputs = input("Enter input separated by spaces as follows: \nSurvey_Name Luminosity Pulsar_Data_File_Name: \n")
 
@@ -74,6 +77,7 @@ tsky1 = np.fromfile('tsky1.o', dtype=np.float64) # get the sky temperatures from
 # create empty rows to store new data in (for dataframe ???)
 pulsar_data["flux"] = None
 pulsar_data["S_min"] = None
+pulsar_data["SNR"] = None
 pulsar_data["is_detectable"] = None
 pulsar_data["f_beaming"] = None
 
@@ -90,16 +94,19 @@ for i, row in pulsar_data.iterrows:
         if flux >= S_min: # save info on whether or not the simulated pulsar would be detectable with the given survey as well as its flux and S_min
             pulsar_data["flux"][i] = flux
             pulsar_data["S_min"][i] = S_min
+            pulsar_data["SNR"][i] = SNR
             pulsar_data["is_detectable"][i] = True
             pulsar_data["f_beaming"][i] = selection_effects.f_beaming(row)
         else:
             pulsar_data["flux"][i] = flux
             pulsar_data["S_min"][i] = S_min
+            pulsar_data["SNR"][i] = SNR
             pulsar_data["is_detectable"][i] = False
             pulsar_data["f_beaming"][i] = selection_effects.f_beaming(row)
     else: # If the pulsar is not in the viewing area, don't save any info other than that it is not detectable
         pulsar_data["flux"][i] = None
         pulsar_data["S_min"][i] = None
+        pulsar_data["SNR"][i] = None
         pulsar_data["is_detectable"][i] = False
         pulsar_data["f_beaming"][i] = None
 
