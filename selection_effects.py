@@ -10,6 +10,8 @@ import gal_cart
 import survey
 from skytempy import skytemp
 
+# astrophysical constants
+R0_Kpc=8.5 # Kpc, distance to Sun-Galaxy Center
 
 def DM_fnct(x, y, z):
     """
@@ -101,7 +103,7 @@ def flux(L, x, y, z):
         D, distance to the pulsar (Kpc)
     """
 
-    D = x-8 # distance to pulsar (Kpc)
+    D = x-R0_Kpc # distance to pulsar (Kpc)
     F = L/(4*np.pi*(D**2)) # flux of the pulsar in (Watts / Kpc^2)
     return F, D
 

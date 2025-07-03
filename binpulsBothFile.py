@@ -11,9 +11,6 @@ import survey
 import uconst
 import selection_effects
 
-# astrophysical constants
-R0_Kpc=8.5 # Kpc, distance to Sun-Galaxy Center
-
 # allow the user to input the name of the survey, the luminosity, and the pulsar data file that we want to use
 inputs = input("Enter input separated by spaces as follows: \nSurvey_Name Pulsar_Data_File_Name: \n")
 
