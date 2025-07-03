@@ -149,7 +149,7 @@ def S_min(p, s, L, npol = 2, SNmin = 10, beta=1):
 
     W_i = P*0.05 # fixed duty cycle in paper????, seconds
     # compute the effective pulse width
-    W_e=np.sqrt(W_i**2 + tau_samp**2 + (tau_samp*(DM/DM_0))**2 + tau_scatt**2)
+    We=np.sqrt(W_i**2 + tau_samp**2 + (tau_samp*(DM/DM_0))**2 + tau_scatt**2)
 
     # get the S/N ratio of the pulsar data
     npol = 2
@@ -159,7 +159,7 @@ def S_min(p, s, L, npol = 2, SNmin = 10, beta=1):
         SNR = F / np.sqrt(np.pi / 2) / np.sqrt(We / (P - We)) / (T_rec + T_sky) * (G * np.sqrt(npol * d_f * t_int))
 
     # compute the minimum flux
-    S_min = beta*((SNmin*(T_rec+T_sky))/(G*np.sqrt(npol*t_int*(d_f/1e6))))*np.sqrt(W_e/(P-W_e))
+    S_min = beta*((SNmin*(T_rec+T_sky))/(G*np.sqrt(npol*t_int*(d_f/1e6))))*np.sqrt(We/(P-We))
     return S_min, F, SNR
 
 def f_beaming(p):

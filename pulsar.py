@@ -29,7 +29,7 @@ def print_pulsar(p):
     printf("spectral index=%g\n", p.sp_idx)
     printf("S400=%g\n", S400_fnct(p))
     printf("DM=%g\n", DM_fnct(p))
-    # printf("Wi=%g\n", p.Wi)
+    # printf("W_i=%g\n", p.W_i)
     printf("FWHM=%g\n", p.FWHM)
     printf("bmask=%d\n", p.bmask)
     printf("(x0,y0,z0)=(%g, %g, %g)\n", p.x0, p.y0, p.z0)
@@ -40,7 +40,7 @@ def print_pulsar(p):
     gal_cart.cart2gal(p.x, p.y, p.z)
     printf("d=%g\n", d)
     printf("L400_fnct(p)=%g\n", L400_fnct(p))
-    printf("Pdot_fnct(p)=%g\n", Pdot_fnct(p))
+    printf("gal_dot(p)=%g\n", gal_dot(p))
 
     printf("\n")
 
