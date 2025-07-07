@@ -25,7 +25,7 @@ def DM_fnct(x, y, z):
     Returns:
     --------
     dm, the dispersion measure of the pulsar in the given direction. (pc / cm^3)
-    tau_sc, scattering timescale at 1 GHz (from pygedm dist_to_dm docs)
+    tau_sc, scattering timescale at 1 MHz (from pygedm dist_to_dm docs)
     """
 
     l, b, d = gal_cart.cart2gal(x, y, z) # d needs to be in pc for pygedm function
@@ -107,6 +107,74 @@ def flux(L, x, y, z):
     F = L/(4*np.pi*(D**2)) # flux of the pulsar in (Watts / Kpc^2)
     return F, D
 
+def eccentricity(P, a, e, i, T, . . . ):
+    """
+    Compute the effects eccentricity in a binary orbit has on the detectability of a pulsar. A pulsar is detected when (gamma_1m)^2, (gamma_2m)^2, (gamma_3m)^2 are maximized to 1.
+
+    Input:
+        P, period of the pulsar
+        a, semimajor axis of the pulsar
+        e, eccentricity of the pulsar's orbit
+        i, orbital inclination of the binary system
+        T, duration of the observation
+        . . .
+
+    Returns:
+        gamma_1m, ratio of the highest power of the pulsar for the mth harmonic when acceleration and higher order terms are non-zero to when they are zero
+
+        gamma_2m, ratio of the highest power of the pulsar for the mth harmonic when jerk and higher order terms are non-zero to when they are zero
+
+        gamma_3m, ratio of the highest power of the pulsar for the mth harmonic when higher order terms than jerk are non-zero to when they are zero
+
+    NOTE potential issues:
+        - what should we use for m? (np.linspace(1, 20, 20) or something similar?)
+        - what is omega_bar?
+
+    """
+
+    a_p_prime = ((((P/(2 * np.pi))**2) * const.G * (M_p + M_c))**(1/3)))*(M_c/(M_p+M_c))*np.sin(i)
+
+    # get the mean anomaly
+    M = w_0 * (t - T_p) # NOTE: what is w_0, T_p????
+    M_0 = w_0 * T_p
+
+    # get the eccentric anomaly
+    E - e * np.sin(E) = M # NOTE: how do we want to solve this for E????
+    E_0 - e * np.sin(E_0) = M_0
+
+    # get the true anomaly at time t and time t=0
+    f = 2 * np.arctan(np.sqrt((1 + e)/(1-e)) * np.tan(E/2))
+    f_0 = 2 * np.arctan(np.sqrt((1 + e)/(1-e)) * np.tan(E_0/2))
+
+    # get the radius vectors of the pulsar
+    r_l = a_p_prime * (1 - e**2) * ((1 + e * np.cos(f))**(-1)) * np.sin(f + omega_bar)
+    r_lo = a_p_prime * (1 - e**2) * ((1 + e * np.cos(f_0))**(-1)) * np.sin(f_0 + omega_bar)
+
+    # get the velocity vector of the pulsar
+    v_l = ((2 * np.pi)/P) * ((a_p_prime)/np.sqrt(1 - e**2)) * (np.cos(f + omega_bar) + (e * np.cos(omega_bar)))
+    v_lo = ((2 * np.pi)/P) * ((a_p_prime)/np.sqrt(1 - e**2)) * (np.cos(f_0 + omega_bar) + (e * np.cos(omega_bar)))
+
+    # get the acceleration vector of the pulsar
+    a_l = - (((2 * np.pi)/P)**2) * (a_p_prime/((1 - e**2)**2)) * np.sin(f + omega_bar) * (1 + e * np.cos(f))**2
+    a_lo = - (((2 * np.pi)/P)**2) * (a_p_prime/((1 - e**2)**2)) * np.sin(f_0 + omega_bar) * (1 + e * np.cos(f_0))**2
+
+    # get the jerk vector of the pulsar
+    j_l = - (((2 * np.pi)/P)**3) * (a_p_prime/((1 - e**2)**(7/2))) * ((1 + e*np.cos(f))**3) * (np.cos(f + omega_bar) + e * np.cos(omega_bar) - 3 * e * np.sin(f + omega_bar) * np.sin(f))
+    j_l = - (((2 * np.pi)/P)**3) * (a_p_prime/((1 - e**2)**(7/2))) * ((1 + e*np.cos(f_0))**3) * (np.cos(f_0 + omega_bar) + e * np.cos(omega_bar) - 3 * e * np.sin(f_0 + omega_bar) * np.sin(f_0))
+
+
+    # compute the gamma factors based on the above values for the pulsar
+    gamma_1m = (1/(T * (-v_lo))) * np.abs(np.exp(((1j*m*w_p)/const.c)*(r_l - r_lo - (v_lo * T)))) # for the general case of orbital eccentricity, describes sensitivity loss of a standard pulsar search
+
+    # Do we need these??
+    # NOTE: still need to integrate the following two equaitons over T inside the abs!!!!
+    gamma_2m = (1/(T)) * np.abs(np.exp(((1j*m*w_p)/const.c)*(r_l - r_lo - ((a_lo/2) * T**2) - (v_lo * T))))
+    gamma_3m = (1/(T)) * np.abs(np.exp(((1j*m*w_p)/const.c)*(r_l - r_lo - ((j_lo/6) * T**3) - ((a_lo/2) * T**2) - (v_lo * T))))
+
+    # return the gamma factors so we can check if the pulsar is detected with its given eccentricity
+    # if the returned numbers (gamma_..**2) are 1, pulsar has been detected
+    return gamma_1m**2, gamma_2m**2, gamma_3m**2
+
 def S_min(p, s, L, npol = 2, SNmin = 10, beta=1):
     """
     Compute the minimum flux that a pulsar can have and still be detectable.
@@ -114,13 +182,13 @@ def S_min(p, s, L, npol = 2, SNmin = 10, beta=1):
     Input:
         p, row of pulsar data from dataframe
         s, row number of the survey that we are using (full array is stored in survey.py)
-        L, luminosity of the pulsar
+        L, luminosity of the pulsar (Watts??)
         npol, number of polarizations in the detector (automatically set to 2)
         SNmin, minimum detection threshold (automatically set to 10)
         beta, parameter to account for the errors that increase the noise in the signal (automatically set to 1)
 
     Returns:
-        S_min, the lower limit of flux a simulated pulsar can have to be detected at a given S/N ratio
+        S_minDsq, the lower limit of flux a simulated pulsar can have to be detected at a given S/N ratio
         F, flux of the pulsar (W/kpc^2)
         SNR, signal to noise ratio of the pulsar
     """
@@ -142,6 +210,8 @@ def S_min(p, s, L, npol = 2, SNmin = 10, beta=1):
 
     F, D = flux(L, x, y, z) # get the flux of the pulsar
 
+    gamma_1m_sq, gamma_2m_sq, gamma_3m_sq = eccentricity(P, a, e, i, t_int, . . .)
+
     W_i = P*0.05 # fixed duty cycle in paper????, seconds
     # compute the effective pulse width
     We=np.sqrt(W_i**2 + tau_samp**2 + (tau_samp*(DM/DM_0))**2 + tau_scatt**2)
@@ -155,7 +225,7 @@ def S_min(p, s, L, npol = 2, SNmin = 10, beta=1):
 
     # compute the minimum flux
     S_minDsq = beta*((SNmin*(T_rec+T_sky))/(G*np.sqrt(npol*t_int*(d_f/1e6))))*np.sqrt(We/(P-We))*(D**2)
-    return S_minDsq, F, SNR
+    return S_minDsq, F, SNR, gamma_1m, gamma_2m, gamma_3m
 
 def f_beaming(p):
     """

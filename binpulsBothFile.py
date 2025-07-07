@@ -17,7 +17,7 @@ inputs = input("Enter input separated by spaces as follows: \nSurvey_Name Pulsar
 # take care of the error handling for the user inputs to make sure all are valid before we start computation
 while True: # check to make sure enough inputs where given
     input_list = inputs.split(" ") # inputs should be separated by spaces, split them into a list
-    if len(input_list)!= 3:
+    if len(input_list)!= 2:
         print("Error: not enough inputs given! Please try again. Expected 2 but got", len(input_list))
         inputs = input()
     else:
@@ -25,8 +25,7 @@ while True: # check to make sure enough inputs where given
 
 # get the inputs in separate variables for easier error handling and use later
 survey_name = input_list[0]
-luminosity = input_list[1]
-pulsar_data = input_list[2]
+pulsar_data = input_list[1]
 
 # do error checking on the inputs and get them corrected if necessary
 while True:
@@ -67,7 +66,7 @@ pulsar_data["f_beaming"] = None
 for i, row in pulsar_data.iterrows:
 
     # compute S_min and flux
-    S_minDsq, flux, SNR = selection_effects.S_min(row, s, L)
+    S_minDsq, flux, SNR, gamma_1m_sq, gamma_2m_sq, gamma_3m_sq = selection_effects.S_min(row, s, L)
 
     # get the galactic coordinates of the pulsar
     l, b, d = gal_cart.cart2gal(row['x'], row['y'], row['z'])
@@ -77,7 +76,10 @@ for i, row in pulsar_data.iterrows:
         pulsar_data["S_min"][i] = S_minDsq
         pulsar_data["SNR"][i] = SNR
         pulsar_data["f_beaming"][i] = selection_effects.f_beaming(row)
+        pulsar_data["gamma_1m"][i] = gamma_1m
+        pulsar_data["gamma_2m"][i] = gamma_2m
+        pulsar_data["gamma_3m"][i] = gamma_3m
 
 # NOTE: In what format do we want to save the data?
 # save the updated pulsar_data to a new csv file
-pulsar_data.to_csv("pulsar_data_updated.csv", index=False)
+pulsar_data.to_csv("out_file.csv", index=False)
