@@ -188,7 +188,7 @@ def S_min(M, P_orb, e, P, P_dot, B, x, y, z, vx, vy, vz, L, T_rec, d_f, n_chan, 
 
     Input:
         M, mass (M_sun)
-        P_orb, orbital period (years)
+        P_orb, orbital period (days)
         e, eccentricity
         P, rotational period (seconds)
         P_dot, change in rotational period (seconds)
