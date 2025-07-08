@@ -118,7 +118,7 @@ def eccentricity(P, a, e, i, T, . . . ):
 
     Input:
         P, period of the pulsar
-        a, semimajor axis of the pulsar
+        a, semimajor axis of the binary system
         e, eccentricity of the pulsar's orbit
         i, orbital inclination of the binary system
         T, duration of the observation
@@ -141,8 +141,10 @@ def eccentricity(P, a, e, i, T, . . . ):
 
     a_p_prime = ((((P/(2 * np.pi))**2) * const.G * (M_p + M_c))**(1/3)))*(M_c/(M_p+M_c))*np.sin(i)
 
+    w_0 = (2*np.pi)/P # get the orbital angular frequency
+
     # get the mean anomaly
-    M = w_0 * (t - T_p) # NOTE: what is w_0, T_p????
+    M = w_0 * (t - T_p) # NOTE: T_p is the epoch of periastron passage??? what to do with the time variable???
     M_0 = w_0 * T_p
 
     # get the eccentric anomaly
@@ -215,7 +217,7 @@ def S_min(M, P_orb, e, P, P_dot, B, x, y, z, vx, vy, vz, L, T_rec, d_f, n_chan, 
     """
 
     DM = DM_fnct(x, y, z) # dispersion measure in the direction of the pulsar, Units: pc/cm^3
-    # correct the units to match those of NOTE DM_0 (m^-3??)
+    # NOTE: need to correct the units to match those of DM_0 (m^-3??)
     DM = DM * const.parsec * ((1e2)**3) # new units, m^-3
 
     tau_scatt = tau_scatt_fnct(DM, freq) # ISM scattering time
@@ -226,7 +228,7 @@ def S_min(M, P_orb, e, P, P_dot, B, x, y, z, vx, vy, vz, L, T_rec, d_f, n_chan, 
 
     F, D = flux(L, x, y, z) # get the flux of the pulsar Units: F (mJy), D (Kpc)
 
-    gamma_1m_sq, gamma_2m_sq, gamma_3m_sq = eccentricity(P, a, e, i, t_int, . . .)
+    # gamma_1m_sq, gamma_2m_sq, gamma_3m_sq = eccentricity(P, a, e, i, t_int, . . .)
 
     W_i = P*0.05 # fixed duty cycle in paper, seconds
     # compute the effective pulse width

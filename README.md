@@ -26,7 +26,7 @@ The surveys that are available to test for a pulsar's detectability include:
 - Parkes_Multi_Beam_ALLSKY
 - Parkes_Multi_Beam_part
 - MeerKat
-- SKA (t_int = 2100 s)
+- SKA_2100 (t_int = 2100 s)
 - MeerKat_GalPl
 - MeerKat_tint
 - MeerKat_Galpl_tint
@@ -34,7 +34,7 @@ The surveys that are available to test for a pulsar's detectability include:
 - TRUMP_Meer
 - MeerKat
 - MeerKat
-- SKA (t_int = 300 s)
+- SKA_300 (t_int = 300 s)
 
 The repositories that are required to run this code include:
 - galpy

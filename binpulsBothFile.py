@@ -1,6 +1,7 @@
 # equivalent file of a binpuls____.c file
 
 # import necessary packages
+import sys
 import numpy as np
 import pandas as pd
 import scipy.constants as const
@@ -12,61 +13,41 @@ import survey
 import uconst
 import selection_effects
 
-# allow the user to input the name of the survey, the luminosity, and the pulsar data file that we want to use
-inputs = input("Enter input separated by spaces as follows: \nSurvey_Name Data_File_Name Data_type: \n")
-
 # take care of the error handling for the user inputs to make sure all are valid before we start computation
-while True: # check to make sure enough inputs where given
-    input_list = inputs.split(" ") # inputs should be separated by spaces, split them into a list
-    if len(input_list)!= 2:
-        print("Error: not enough inputs given! Please try again. Expected 2 but got", len(input_list))
-        inputs = input()
-    else:
-        break
+if len(sys.argv)!= 5:
+    print("Error: not enough inputs given! Please try again. Expected 4 but got", len(sys.argv))
+    print("Please pass, survey_name input_data file_type output_name")
+    sys.exit(-1)
 
 # get the inputs in separate variables for easier error handling and use later
-survey_name = input_list[0]
-pulsar_data = input_list[1]
-file_type = input_list[3]
+survey_name = sys.argv[1]
+pulsar_data = sys.argv[2]
+file_type = sys.argv[3]
+output_name = sys.argv[4]
 
 # do error checking on the inputs and get them corrected if necessary
-while True:
-    if str(survey_name) not in survey.surv_array[:, 0]:
-        print("Error: Survey name does not match one that is available.")
-        print("Use one of the following:")
-        print(survey.surv_array[:, 0])
-        survey_name=input()
-    else:
-        if len(np.where(survey.surv_array[:, 0] == str(survey_name))[0])!=1:
-            print("Which version of the survey would you like? Choose one of the following array indices:")
-            print(np.where(survey.surv_array[:, 0] == str(survey_name))[0])
-            n = input()
-            s = survey.surv_array[int(n)]
+if str(survey_name) not in survey.surv_array[:, 0]:
+    print("Error: Survey name does not match one that is available.")
+    print("Use one of the following:")
+    print(survey.surv_array[:, 0])
+    sys.exit(-1)
+else:
+    s = survey.surv_array[np.where(survey.surv_array[:, 0] == str(survey_name))] # get the row of data for the specific survey
 
-            # define each constant in the survey array as what it is for greater readability
-            # units: none, ???, MHz, none, MHz, s, none, s
-            name, T_rec, d_f, n_chan, freq, tau_samp, G, t_int = s[0], s[1], s[2], s[3], s[4], s[5], s[6], s[7]
-        else:
-            s = survey.surv_array[np.where(survey.surv_array[:, 0] == str(survey_name))] # get the row of data for the specific survey
+    # define each constant in the survey array as what it is for greater readability
+    # units: none, ???, MHz, none, MHz, s, none, s
+    name, T_rec, d_f, n_chan, freq, tau_samp, G, t_int = s[0], s[1], s[2], s[3], s[4], s[5], s[6], s[7]
 
-            # define each constant in the survey array as what it is for greater readability
-            # units: none, ???, MHz, none, MHz, s, none, s
-            name, T_rec, d_f, n_chan, freq, tau_samp, G, t_int = s[0], s[1], s[2], s[3], s[4], s[5], s[6], s[7]
-        break
-
-while True:
-    try:
-        # NOTE: this will need to be changed depending on the type of file that we end up loading.
-        p = pd.read_csv(pulsar_data) # load the pulsar data in as an array
-        break
-    except Exception as e:
-        print("Error: invalid entry for pulsar data file name, please try again.")
-        pulsar_data = input()
+try:
+    p = pd.read_csv(pulsar_data) # load the pulsar data in as a dataframe
+except Exception as e:
+    print("Error: invalid entry for pulsar data file name, please try again.")
+    sys.exit(-1)
 
 print("All inputs successfully processed!")
 
 
-# create empty rows to store new data in (for dataframe ???)
+# create empty rows to store new data in
 pulsar_data["flux1"] = None
 pulsar_data["flux2"] = None
 pulsar_data["S_min1"] = None
@@ -89,7 +70,6 @@ for i, row in p.iterrows:
         # define each constant in the pulsar data as what it is for greater readability
         # Units: none, M_sun, M_sun, none, s, s, s^2, s^2, T, T, Kpc, Kpc, Kpc, Kpc, Kpc, Kpc, km/s, km/s, km/s, km/s, km/s, km/s, mJy Kpc^2, mJy Kpc^2
         ID, M_1, M_2, P_orb, e, P_1, P_2, P_dot1, P_dot2, B_1, B_2, x1, y1, z1, x2, y2, z2, vx1, vy1, vz1, vx2, vy2, vz2, L1, L2 = row['ID'], row['M1'], row['M2'], row['Porb'], row['e'], row['P1'], row['P2'], row['Pdot1'], row['Pdot2'], row['B1'], row['B2'], row['x1'], row['y1'], row['z1'], row['x2'], row['y2'], row['z2'], row['vx1'], row['vy1'], row['vz1'], row['vx2'], row['vy2'], row['vz2'], row['L1'], row['L2']
-        # NOTE ??? dataframe or array?
 
         # check to see if each object is a neutron star, if it is not, save values as None, else compute the values
         if P_1 == "NaN":
@@ -106,7 +86,6 @@ for i, row in p.iterrows:
         # define each constant in the pulsar data as what it is for greater readability
         # Units: none, M_sun, none, s, s^2, T, Kpc, Kpc, Kpc, km/s, km/s, km/s, mJy Kpc^2
         ID, M_1, P_orb, e, P_1, P_dot1, B_1, x1, y1, z1, vx1, vy1, vz1, L1 = row['ID'], row['M1'], row['Porb'], row['e'], row['P1'], row['Pdot1'], row['B1'], row['x1'], row['y1'], row['z1'], row['vx1'], row['vy1'], row['vz1'], row['L1']
-        # NOTE ??? dataframe or array?
 
         # check to see if each object is a neutron star, if it is not, save values as None, else compute the values
         if P_1 == "NaN":
@@ -134,6 +113,5 @@ for i, row in p.iterrows:
         pulsar_data["d_1"][i] = d_1
         pulsar_data["d_2"][i] = d_2
 
-# NOTE: In what format do we want to save the data?
 # save the updated pulsar_data to a new csv file
-pulsar_data.to_csv("out_file.csv", index=False)
+pulsar_data.to_csv(output_name, index=False)

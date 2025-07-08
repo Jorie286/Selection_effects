@@ -227,7 +227,7 @@ surv_array=np.array([["Parkes_70_cm",      60,   32,   256,   436,        0.0003
                     ["Parkes_Multi_Beam_ALLSKY", 24,   288,  96,    1374,       0.00025,   0.65, 2100,     ic_all_sky],
                     ["Parkes_Multi_Beam_part", 24,   288,  96,    1374,       0.00025,   0.65, 2100,     ic_part_sky],
                     ["MeerKat",           18, 800, 1024, 1400, 0.000064, 2.8, 2100, ic_all_sky_MeerSKA],
-                    ["SKA",               30, 300, 1024, 1400, 0.000064, 8.4, 2100, ic_all_sky_MeerSKA],
+                    ["SKA_2100",               30, 300, 1024, 1400, 0.000064, 8.4, 2100, ic_all_sky_MeerSKA],
                     ["MeerKat_GalPl", 18, 800, 1024, 1400, 0.000064, 2.8, 2100, ic_GalPlane_MeerSKA],
                     ["MeerKat_tint", 18, 800, 1024, 1400, 0.000064, 2.8, 300, ic_all_sky_MeerSKA],
                     ["MeerKat_Galpl_tint", 18, 800, 1024, 1400, 0.000064, 2.8, 300, ic_GalPlane_MeerSKA],
@@ -235,4 +235,4 @@ surv_array=np.array([["Parkes_70_cm",      60,   32,   256,   436,        0.0003
                     ["TRUMP_Meer", 18, 400, 1024, 1400, 0.000064, 1.83, 637, ic_TRUMP_Meer],
                     ["MeerKat", 18, 800, 1024, 1400, 0.000064, 2.8, 2100, ic_all_sky_MeerSKA ],
                     ["MeerKat", 18, 800, 1024, 1400, 0.000064, 2.8, 300, ic_GalPlane_MeerSKA ],
-                    ["SKA",     30, 300, 1024, 1400, 0.000064, 8.4, 300, ic_GalPlane_MeerSKA]])
+                    ["SKA_300",     30, 300, 1024, 1400, 0.000064, 8.4, 300, ic_GalPlane_MeerSKA]])
