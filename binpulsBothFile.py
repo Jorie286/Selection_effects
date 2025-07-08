@@ -57,7 +57,7 @@ while True:
 while True:
     try:
         # NOTE: this will need to be changed depending on the type of file that we end up loading.
-        p = pd.read_csv(pulsar_data, dtype=np.float64) # load the pulsar data in as an array
+        p = pd.read_csv(pulsar_data) # load the pulsar data in as an array
         break
     except Exception as e:
         print("Error: invalid entry for pulsar data file name, please try again.")

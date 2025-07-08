@@ -9,8 +9,8 @@ The units used within the code are:
 - Dispersion Measure: m^-3 (???)
 - Distance: Kpc
 - Frequency: MHz
-- Flux: ??? / Kpc^2
-- Luminosity: ???
+- Flux: mJy
+- Luminosity: mJy Kpc^2
 - Time/ Period: seconds
 
 The surveys that are available to test for a pulsar's detectability include:
