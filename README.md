@@ -11,7 +11,10 @@ The units used within the code are:
 - Frequency: MHz
 - Flux: mJy
 - Luminosity: mJy Kpc^2
-- Time/ Period: seconds
+- Orbital Period: days
+- Rotation Period: seconds
+- Surface Magnetic Field: Tesla
+- Velocity: km/s
 
 The surveys that are available to test for a pulsar's detectability include:
 - Parkes_70_cm
