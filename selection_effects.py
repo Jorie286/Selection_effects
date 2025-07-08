@@ -11,7 +11,7 @@ import survey
 from skytempy import skytemp
 
 # astrophysical constants
-R0_Kpc=8.5 # Kpc, distance to Sun-Galaxy Center
+R0_Kpc=8.5 # Kpc, distance Sun-Galaxy Center
 
 def DM_fnct(x, y, z):
     """
@@ -19,7 +19,7 @@ def DM_fnct(x, y, z):
 
     Inputs:
     -------
-    x, y, z; cartisian coordinates for the position of the pulsar
+    x, y, z; cartesian coordinates for the position of the pulsar
     freq, observing frequency (MHz)
 
     Returns:
@@ -28,9 +28,13 @@ def DM_fnct(x, y, z):
     tau_sc, scattering timescale at 1 MHz (from pygedm dist_to_dm docs)
     """
 
-    l, b, d = gal_cart.cart2gal(x, y, z) # d needs to be in pc for pygedm function
+    l, b, d = gal_cart.cart2gal(x, y, z) # Units: l (rad), b (rad), d (kpc)
+    d = d * 1e3 # convert d from kpc to pc
+
+    # NOTE: d needs to be in pc for the pygedm function
     DM, tau_sc = pygedm.dist_to_dm((l, b), dist = d, nu=(freq/1e3)) # Units: DM (pc / cm^3), tau_sc (GHz)
     tau_sc = tau_sc*1e3 # convert tau_sc to MHz timescale
+
     return DM, tau_sc
 
 def tau_scatt_fnct(DM, freq):
@@ -45,6 +49,7 @@ def tau_scatt_fnct(DM, freq):
     Returns:
     tau_scatt, ISM scattering time (seconds)
     """
+    # NOTE: need to check what units need to go in here since unit analysis will not work with log10.
     tau_scatt = -6.46 + 0.154 * np.log10(DM) + 1.07 * np.log10(DM) ** 2 - 3.86 * np.log10(freq / 1e3)
     tau_scatt = 10**tau_scatt # ms
     tau_scatt = tau_scatt * 1e-3 # convert to seconds
@@ -52,13 +57,13 @@ def tau_scatt_fnct(DM, freq):
 
 def DM0_fnct(freq, d_f, n_chan, tau_samp):
     """
-    Get the diaganal dispersion measure of the survey.
+    Get the diagonal dispersion measure of the survey.
 
     Input:
     ------
-    freq, survey frequency (seconds)
-    d_f, reciever bandwidth (MHz)
-    n_chan, number of reciever chanels
+    freq, survey frequency (MHz)
+    d_f, receiver bandwidth (MHz)
+    n_chan, number of receiver channels
     tau_samp, sampling time (seconds)
 
     Returns:
@@ -76,17 +81,17 @@ def T_sky_fnct(x, y, z, freq):
 
     Input:
     ------
-    x, y, x; cartisian coordinates of the pulsar
+    x, y, x; cartesian coordinates of the pulsar
     freq, survey frequency (MHz)
 
     Returns:
     --------
     T_sky, sky temperature in the direction of the puslar
     """
-    l, b, d = gal_cart.cart2gal(x, y, z) # galactic coordinates of the puslar
+    l, b, d = gal_cart.cart2gal(x, y, z) # galactic coordinates of the puslar, Units: l (rad), b (rad), d (kpc)
     # Sky temperature at 408 MHz
     s = skytemp.SkyTemp(l, b, '.\\skytempy\\haslam408_ds_Remazeilles2014.fits') # get the skytemp information from the fits file
-    T_sky = s.get_temp(freq) # get the temperature from the output
+    T_sky = s.get_temp(freq) # get the temperature from the output, freq units in MHz
 
     return T_sky
 
@@ -96,15 +101,15 @@ def flux(L, x, y, z):
 
     Input:
         L, luminosity of the modeled pulsar, an input given by user (Watts ???)
-        p, row of pulsar data from dataframe
+        x, y, z; cartesian coordinates
 
     Returns:
-        F, flux of the pulsar (W/Kpc^2)
+        F, flux of the pulsar (mJy)
         D, distance to the pulsar (Kpc)
     """
 
     D = x-R0_Kpc # distance to pulsar (Kpc)
-    F = L/(4*np.pi*(D**2)) # flux of the pulsar in (Watts / Kpc^2)
+    F = L/(4*np.pi*(D**2)) # flux of the pulsar in (Watts / Kpc^2) ????
     return F, D
 
 def eccentricity(P, a, e, i, T, . . . ):
@@ -120,11 +125,13 @@ def eccentricity(P, a, e, i, T, . . . ):
         . . .
 
     Returns:
-        gamma_1m, ratio of the highest power of the pulsar for the mth harmonic when acceleration and higher order terms are non-zero to when they are zero
+        gamma_1m_sq, ratio of the highest power of the pulsar for the mth harmonic when acceleration and higher order terms are non-zero to when they are zero
 
-        gamma_2m, ratio of the highest power of the pulsar for the mth harmonic when jerk and higher order terms are non-zero to when they are zero
+        gamma_2m_sq, ratio of the highest power of the pulsar for the mth harmonic when jerk and higher order terms are non-zero to when they are zero
 
-        gamma_3m, ratio of the highest power of the pulsar for the mth harmonic when higher order terms than jerk are non-zero to when they are zero
+        gamma_3m_sq, ratio of the highest power of the pulsar for the mth harmonic when higher order terms than jerk are non-zero to when they are zero
+
+    NOTE: Need to check units!!
 
     NOTE potential issues:
         - what should we use for m? (np.linspace(1, 20, 20) or something similar?)
@@ -175,32 +182,41 @@ def eccentricity(P, a, e, i, T, . . . ):
     # if the returned numbers (gamma_..**2) are 1, pulsar has been detected
     return gamma_1m**2, gamma_2m**2, gamma_3m**2
 
-def S_min(p, s, L, npol = 2, SNmin = 10, beta=1):
+def S_min(M, P_orb, e, P, P_dot, B, x, y, z, vx, vy, vz, L, T_rec, d_f, n_chan, freq, tau_samp, G, t_int, npol = 2, SNmin = 10, beta=1):
     """
     Compute the minimum flux that a pulsar can have and still be detectable.
 
     Input:
-        p, row of pulsar data from dataframe
-        s, row number of the survey that we are using (full array is stored in survey.py)
-        L, luminosity of the pulsar (Watts??)
+        M, mass (M_sun)
+        P_orb, orbital period (years)
+        e, eccentricity
+        P, rotational period (seconds)
+        P_dot, change in rotational period (seconds)
+        B, surface magnetic field (Tesla)
+        x, y, z; cartesian coordinates
+        vx, vy, vz; change in position of each cartesian
+        L, luminosity (mJy Kpc^2)
+        T_rec, receiver temperature
+        d_f, receiver bandwidth (MHz)
+        n_chan, number of channels in the survey
+        freq, observing frequency (MHz)
+        tau_samp, sampling time (seconds)
+        G, gain of the telescope
+        t_int, integration time (seconds)
         npol, number of polarizations in the detector (automatically set to 2)
         SNmin, minimum detection threshold (automatically set to 10)
         beta, parameter to account for the errors that increase the noise in the signal (automatically set to 1)
 
     Returns:
-        S_minDsq, the lower limit of flux a simulated pulsar can have to be detected at a given S/N ratio
-        F, flux of the pulsar (W/kpc^2)
-        SNR, signal to noise ratio of the pulsar
+        S_min, the lower limit of flux a simulated pulsar can have to be detected at a given S/N ratio
+        F, flux (mJy)
+        D, distance (Kpc)
+        gamma_1m_sq, gamma_2m_sq, gamma_3m_sq; numbers to check if the object is detectable with the given eccentricity
     """
 
-    # define each constant in the survey array as what it is for greater readability
-    # units: none, ???, MHz, none, MHz, s, none, s
-    name, T_rec, d_f, n_chan, freq, tau_samp, G, t_int = s[0], s[1], s[2], s[3], s[4], s[5], s[6], s[7]
-
-    # define each constant in the pulsar data as what it is for greater readability
-    P, x, y, z = p['P'], p['x'], p['y'], p['z']# P in seconds, x, y, z in Kpc
-
-    DM = DM_fnct(x, y, z)# dispersion measure in the direction of the pulsar (how to compute???)
+    DM = DM_fnct(x, y, z) # dispersion measure in the direction of the pulsar, Units: pc/cm^3
+    # correct the units to match those of NOTE DM_0 (m^-3??)
+    DM = DM * const.parsec * ((1e2)**3) # new units, m^-3
 
     tau_scatt = tau_scatt_fnct(DM, freq) # ISM scattering time
 
@@ -208,35 +224,35 @@ def S_min(p, s, L, npol = 2, SNmin = 10, beta=1):
 
     T_sky = T_sky_fnct(x, y, z, freq) # get the sky temperature in the direction of the pulsar
 
-    F, D = flux(L, x, y, z) # get the flux of the pulsar
+    F, D = flux(L, x, y, z) # get the flux of the pulsar Units: F (mJy), D (Kpc)
 
     gamma_1m_sq, gamma_2m_sq, gamma_3m_sq = eccentricity(P, a, e, i, t_int, . . .)
 
-    W_i = P*0.05 # fixed duty cycle in paper????, seconds
+    W_i = P*0.05 # fixed duty cycle in paper, seconds
     # compute the effective pulse width
-    We=np.sqrt(W_i**2 + tau_samp**2 + (tau_samp*(DM/DM_0))**2 + tau_scatt**2)
+    We = np.sqrt(W_i**2 + tau_samp**2 + (tau_samp*(DM/DM_0))**2 + tau_scatt**2) # Units: seconds
 
     # get the S/N ratio of the pulsar data
     npol = 2
     if We >= P:
         SNR = 0
-    else:
+    else: # NOTE the SNR ratio eq here does not match the north cap pulsar survey paper!!
         SNR = F / np.sqrt(np.pi / 2) / np.sqrt(We / (P - We)) / (T_rec + T_sky) * (G * np.sqrt(npol * d_f * t_int))
 
-    # compute the minimum flux
-    S_minDsq = beta*((SNmin*(T_rec+T_sky))/(G*np.sqrt(npol*t_int*(d_f/1e6))))*np.sqrt(We/(P-We))*(D**2)
-    return S_minDsq, F, SNR, gamma_1m, gamma_2m, gamma_3m
+    # compute the minimum flux (S_min)
+    S_min = beta*((SNmin*(T_rec+T_sky))/(G*np.sqrt(npol*t_int*(d_f/1e6))))*np.sqrt(We/(P-We))
+
+    return S_min, F, D, gamma_1m, gamma_2m, gamma_3m
 
 def f_beaming(p):
     """
     Computes the pulsar beaming fraction. It should return a result between 0 and 1.
 
     Input:
-        p, row of the pulsar data from dataframe
+        p, period of the pulsar (seconds)
     Returns:
         f_b, pulsar beaming fraction
     """
-    P = p['P'] # seconds
 
     # beaming fraction model, P must be entered in seconds
     f_b = 0.09*np.log(P/10)**2+0.03 # is the log in this equation log base 10????

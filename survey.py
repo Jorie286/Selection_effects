@@ -234,6 +234,5 @@ surv_array=np.array([["Parkes_70_cm",      60,   32,   256,   436,        0.0003
                     ["Lowlat", 23, 340, 870,1240 ,0.000256, 0.65, 4320, ic_lowlat],
                     ["TRUMP_Meer", 18, 400, 1024, 1400, 0.000064, 1.83, 637, ic_TRUMP_Meer],
                     ["MeerKat", 18, 800, 1024, 1400, 0.000064, 2.8, 2100, ic_all_sky_MeerSKA ],
-                    ["SKA",     30, 300, 1024, 1400, 0.000064, 8.4, 2100, ic_all_sky_MeerSKA ],
                     ["MeerKat", 18, 800, 1024, 1400, 0.000064, 2.8, 300, ic_GalPlane_MeerSKA ],
                     ["SKA",     30, 300, 1024, 1400, 0.000064, 8.4, 300, ic_GalPlane_MeerSKA]])

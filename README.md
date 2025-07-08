@@ -5,11 +5,15 @@ Determine which simulated pulsars would be detected in a survey by calculating t
 To determine which pulsars would be detected, the binpulsBothFile.py should be run. It asks for inputs of what survey you want to use, a file containing the luminosities associated with the pulsar data, and the file in which the simulated pulsar data is stored. The script will return a pulsar_data_updated.csv file when it finishes running. This file will include new columns with it's flux, beaming fraction, flux lower limit for the given survey, and signal to noise ratio.
 
 The units used within the code are:
+- Angle: radians
+- Dispersion Measure: m^-3 (???)
 - Distance: Kpc
-- Time: seconds
 - Frequency: MHz
+- Flux: ??? / Kpc^2
+- Luminosity: ???
+- Time/ Period: seconds
 
-The surveys that are avaliable to test for a pulsar's detectability include:
+The surveys that are available to test for a pulsar's detectability include:
 - Parkes_70_cm
 - Parkes_Multi_Beam
 - Swin_Interm Lat
@@ -19,20 +23,19 @@ The surveys that are avaliable to test for a pulsar's detectability include:
 - Parkes_Multi_Beam_ALLSKY
 - Parkes_Multi_Beam_part
 - MeerKat
-- SKA
+- SKA (t_int = 2100 s)
 - MeerKat_GalPl
 - MeerKat_tint
 - MeerKat_Galpl_tint
 - Lowlat
 - TRUMP_Meer
 - MeerKat
-- SKA
 - MeerKat
-- SKA
+- SKA (t_int = 300 s)
 
 The repositories that are required to run this code include:
 - galpy
-- skytempy (necessary files included in a folder within the repository)
+- numpy
 - pygedm
 - scipy
-- numpy
+- skytempy (necessary files included in a folder within the repository)
