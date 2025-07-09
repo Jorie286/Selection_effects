@@ -73,14 +73,20 @@ for i, row in p.iterrows:
 
         # check to see if each object is a neutron star, if it is not, save values as None, else compute the values
         if P_1 == "NaN":
-            S_min1, flux1, d_1, gamma_1m_sq1, gamma_2m_sq1, gamma_3m_sq1 = None, None, None, None, None, None
+            S_min1, flux1, d_1, f_b1 = None, None, None, None
         else:
-            S_min1, flux1, d_1, gamma_1m_sq1, gamma_2m_sq1, gamma_3m_sq1 = selection_effects.S_min(M_1, P_orb, e, P_1, P_dot1, B_1, x1, y1, z1, vx1, vy1, vz1, L1, T_rec, d_f, n_chan, freq, tau_samp, G, t_int)
+            S_min1, flux1, d_1 = selection_effects.S_min(M_1, P_orb, e, P_1, P_dot1, B_1, x1, y1, z1, vx1, vy1, vz1, L1, T_rec, d_f, n_chan, freq, tau_samp, G, t_int)
+
+            f_b1 = selection_effects.f_beaming(P_1)
 
         if P_2 == "NaN":
-            S_min2, flux2, d_2, gamma_1m_sq2, gamma_1m_sq2, gamma_3m_sq2 = None, None, None, None, None, None
+            S_min2, flux2, d_2, f_b2 = None, None, None, None
         else:
-            S_min2, flux2, d_2, gamma_1m_sq2, gamma_2m_sq2, gamma_3m_sq2 = selection_effects.S_min(M_2, P_orb, e, P_2, P_dot2, B_2, x2, y2, z2, vx2, vy2, vz2, L2, T_rec, d_f, n_chan, freq, tau_samp, G, t_int)
+            S_min2, flux2, d_2 = selection_effects.S_min(M_2, P_orb, e, P_2, P_dot2, B_2, x2, y2, z2, vx2, vy2, vz2, L2, T_rec, d_f, n_chan, freq, tau_samp, G, t_int)
+
+            f_b2 = selection_effects.f_beaming(P_2)
+
+        gamma_1m_sq, gamma_2m_sq, gamma_3m_sq = selection_effects.eccentricity(P_orb, M_1, M_2, e, x1, y1, z1, x2, y2, z2, vx1, vy1, vz1, vx2, vy2, vz2, i, T) # NOTE: not sure what to input for i and T here
 
     else:
         # define each constant in the pulsar data as what it is for greater readability
@@ -89,12 +95,14 @@ for i, row in p.iterrows:
 
         # check to see if each object is a neutron star, if it is not, save values as None, else compute the values
         if P_1 == "NaN":
-            S_min1, flux1, d_1, gamma_1m_sq1, gamma_2m_sq1, gamma_3m_sq1 = None, None, None, None, None, None
+            S_min1, flux1, d_1, f_b1 = None, None, None, None
         else:
-            S_min1, flux1, d_1, gamma_1m_sq1, gamma_2m_sq1, gamma_3m_sq1 = selection_effects.S_min(M_1, P_orb, e, P_1, P_dot1, B_1, x1, y1, z1, vx1, vy1, vz1, L1, T_rec, d_f, n_chan, freq, tau_samp, G, t_int)
+            S_min1, flux1, d_1 = selection_effects.S_min(M_1, P_orb, e, P_1, P_dot1, B_1, x1, y1, z1, vx1, vy1, vz1, L1, T_rec, d_f, n_chan, freq, tau_samp, G, t_int)
+
+            f_b1 = selection_effects.f_beaming(P_1)
 
         # set all other variables that would be returned for a binary to none for a single star system
-        S_min2, flux2, gamma_1m_sq2, gamma_2m_sq2, gamma_3m_sq2, d_2 = None, None, None, None, None, None
+        S_min2, flux2, gamma_1m_sq, gamma_2m_sq, gamma_3m_sq, d_2, f_b2 = None, None, None, None, None, None, None
 
 
     if survey.s[-1](l, b) == 1: # check to see if the pulsar is within the survey's viewing area. If it is, save the info.
@@ -102,14 +110,11 @@ for i, row in p.iterrows:
         pulsar_data["flux2"][i] = flux2
         pulsar_data["S_min1"][i] = S_min1
         pulsar_data["S_min2"][i] = S_min2
-        pulsar_data["f_beaming1"][i] = selection_effects.f_beaming(P_1)
-        pulsar_data["f_beaming2"][i] = selection_effects.f_beaming(P_2)
-        pulsar_data["gamma_1m_sq1"][i] = gamma_1m_sq1
-        pulsar_data["gamma_2m_sq1"][i] = gamma_2m_sq1
-        pulsar_data["gamma_3m_sq1"][i] = gamma_3m_sq1
-        pulsar_data["gamma_1m_sq2"][i] = gamma_1m_sq2
-        pulsar_data["gamma_2m_sq2"][i] = gamma_2m_sq2
-        pulsar_data["gamma_3m_sq2"][i] = gamma_3m_sq2
+        pulsar_data["f_beaming1"][i] = f_b1
+        pulsar_data["f_beaming2"][i] = f_b2
+        pulsar_data["gamma_1m_sq"][i] = gamma_1m_sq
+        pulsar_data["gamma_2m_sq"][i] = gamma_2m_sq
+        pulsar_data["gamma_3m_sq"][i] = gamma_3m_sq
         pulsar_data["d_1"][i] = d_1
         pulsar_data["d_2"][i] = d_2
 

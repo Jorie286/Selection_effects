@@ -3,6 +3,7 @@
 # import necessary packages
 import numpy as np
 import scipy.constants as const
+from scipy.optimize import fsolve
 import pygedm
 
 # get functions and constants from other files
@@ -31,9 +32,12 @@ def DM_fnct(x, y, z):
     l, b, d = gal_cart.cart2gal(x, y, z) # Units: l (rad), b (rad), d (kpc)
     d = d * 1e3 # convert d from kpc to pc
 
-    # NOTE: d needs to be in pc for the pygedm function
+    # d needs to be in pc for the pygedm function
     DM, tau_sc = pygedm.dist_to_dm((l, b), dist = d, nu=(freq/1e3)) # Units: DM (pc / cm^3), tau_sc (GHz)
     tau_sc = tau_sc*1e3 # convert tau_sc to MHz timescale
+
+    # NOTE: need to correct the units to match those of DM_0 (s^2 m^-3??)
+    DM = DM * const.parsec * ((1e2)**3) # new units, m^-3
 
     return DM, tau_sc
 
@@ -92,7 +96,7 @@ def T_sky_fnct(x, y, z, freq):
     # Sky temperature at 408 MHz
     s = skytemp.SkyTemp(l, b, '.\\skytempy\\haslam408_ds_Remazeilles2014.fits') # get the skytemp information from the fits file
     T_sky = s.get_temp(freq) # get the temperature from the output, freq units in MHz
-
+    # NOTE: what are the units of Tsky?
     return T_sky
 
 def flux(L, x, y, z):
@@ -109,19 +113,31 @@ def flux(L, x, y, z):
     """
 
     D = x-R0_Kpc # distance to pulsar (Kpc)
-    F = L/(4*np.pi*(D**2)) # flux of the pulsar in (Watts / Kpc^2) ????
+    F = L/(4*np.pi*(D**2)) # flux of the pulsar in (mJy)
     return F, D
 
-def eccentricity(P, a, e, i, T, . . . ):
+def E_fnct(E):
+    """
+    Define the equation to get the eccentric anomaly to be used in eccentricity() later.
+    """
+
+    return E - M - e * np.sin(E)
+
+def eccentricity(P_orb, M_1, M_2, e, x1, y1, z1, x2, y2, z2, vx1, vy1, vz1, vx2, vy2, vz2, i, T):
     """
     Compute the effects eccentricity in a binary orbit has on the detectability of a pulsar. A pulsar is detected when (gamma_1m)^2, (gamma_2m)^2, (gamma_3m)^2 are maximized to 1.
 
     Input:
-        P, period of the pulsar
-        a, semimajor axis of the binary system
-        e, eccentricity of the pulsar's orbit
+        P_orb, orbital period of the binary (days)
+        M_1, mass of first object in binary (M_sun)
+        M_2, mass of second object in binary (M_sun)
+        e, eccentricity of the object's orbit
+        x1, y1, z1; cartesian coordinates of the first object (Kpc)
+        x2, y2, z2; cartesian coordinates of the second object (Kpc)
+        vx1, vy1, vz1; velocity of first object in cartesian coordinates (km/s)
+        vx2, vy2, vz2; velocity of second object in cartesian coordinates (km/s)
         i, orbital inclination of the binary system
-        T, duration of the observation
+        T, duration of the observation (seconds)
         . . .
 
     Returns:
@@ -134,29 +150,43 @@ def eccentricity(P, a, e, i, T, . . . ):
     NOTE: Need to check units!!
 
     NOTE potential issues:
-        - what should we use for m? (np.linspace(1, 20, 20) or something similar?)
-        - what is omega_bar?
+        - what should we use for m and t? (np.linspace(1, 20, 20) or something similar?)
+        - will E_fnct work with M not being defined within its equation?
 
     """
+    # get the distance between the two objects in the binary orbit
+    r = np.sqrt((x1-x2)**2 + (y1-y2)**2 + (z1-z2)**2) # Units: Kpc
 
-    a_p_prime = ((((P/(2 * np.pi))**2) * const.G * (M_p + M_c))**(1/3)))*(M_c/(M_p+M_c))*np.sin(i)
+    # get the relative velocity of the two objects in the binary orbit
+    v = np.sqrt((vx1-vx2)**2 + (vy1-vy2)**2 + (vz1-vz2)**2) # Units: km/s
 
-    w_0 = (2*np.pi)/P # get the orbital angular frequency
+    # define the gravitational constant in more convenient units for this function
+    G_units = 4.301e-9 * 1e3 # Units: km^2 Kpc M_sun^-1 s^-2
+
+    # get the semimajor axis of the binary system with the vis-visa equation
+    a = -(((v**2)/(G_units * (M_1 + M_2))) - (2/r))**(-1) # Units: Kpc
+
+    # NOTE: do we need to consider the orbital inclination of the system?
+    a_p_prime = ((((P/(2 * np.pi))**2) * G_units * (M_1 + M_2))**(1/3))*(M_2/(M_1 + M_2))*np.sin(i) # Units: km^(2/3) Kpc^(1/3)
+
+    w_0 = (2*np.pi)/P # get the orbital angular frequency (Units: Hz)
 
     # get the mean anomaly
     M = w_0 * (t - T_p) # NOTE: T_p is the epoch of periastron passage??? what to do with the time variable???
     M_0 = w_0 * T_p
 
-    # get the eccentric anomaly
-    E - e * np.sin(E) = M # NOTE: how do we want to solve this for E????
-    E_0 - e * np.sin(E_0) = M_0
+    # solve for the eccentric anomaly numerically
+    # NOTE: I am note sure if fsolve will run the following without issue because M is not defined in E_funct
+    E_guess = 1 # may need to be changed depending on how large or small E is going to be
+    E = fsolve(E_fnct, E_guess)
+    E_0 = fsolve(E_fnct, E_guess)
 
     # get the true anomaly at time t and time t=0
     f = 2 * np.arctan(np.sqrt((1 + e)/(1-e)) * np.tan(E/2))
     f_0 = 2 * np.arctan(np.sqrt((1 + e)/(1-e)) * np.tan(E_0/2))
 
     # get the radius vectors of the pulsar
-    r_l = a_p_prime * (1 - e**2) * ((1 + e * np.cos(f))**(-1)) * np.sin(f + omega_bar)
+    r_l = a_p_prime * (1 - e**2) * ((1 + e * np.cos(f))**(-1)) * np.sin(f + omega_bar) # NOTE: omega_bar is the longitude of the periastron???
     r_lo = a_p_prime * (1 - e**2) * ((1 + e * np.cos(f_0))**(-1)) * np.sin(f_0 + omega_bar)
 
     # get the velocity vector of the pulsar
@@ -169,16 +199,17 @@ def eccentricity(P, a, e, i, T, . . . ):
 
     # get the jerk vector of the pulsar
     j_l = - (((2 * np.pi)/P)**3) * (a_p_prime/((1 - e**2)**(7/2))) * ((1 + e*np.cos(f))**3) * (np.cos(f + omega_bar) + e * np.cos(omega_bar) - 3 * e * np.sin(f + omega_bar) * np.sin(f))
-    j_l = - (((2 * np.pi)/P)**3) * (a_p_prime/((1 - e**2)**(7/2))) * ((1 + e*np.cos(f_0))**3) * (np.cos(f_0 + omega_bar) + e * np.cos(omega_bar) - 3 * e * np.sin(f_0 + omega_bar) * np.sin(f_0))
+    j_lo = - (((2 * np.pi)/P)**3) * (a_p_prime/((1 - e**2)**(7/2))) * ((1 + e*np.cos(f_0))**3) * (np.cos(f_0 + omega_bar) + e * np.cos(omega_bar) - 3 * e * np.sin(f_0 + omega_bar) * np.sin(f_0))
 
 
     # compute the gamma factors based on the above values for the pulsar
+    # NOTE: what to do about T (duration of the observation)??? Same as tau_samp or t_int???
     gamma_1m = (1/(T * (-v_lo))) * np.abs(np.exp(((1j*m*w_p)/const.c)*(r_l - r_lo - (v_lo * T)))) # for the general case of orbital eccentricity, describes sensitivity loss of a standard pulsar search
 
     # Do we need these??
     # NOTE: still need to integrate the following two equaitons over T inside the abs!!!!
-    gamma_2m = (1/(T)) * np.abs(np.exp(((1j*m*w_p)/const.c)*(r_l - r_lo - ((a_lo/2) * T**2) - (v_lo * T))))
-    gamma_3m = (1/(T)) * np.abs(np.exp(((1j*m*w_p)/const.c)*(r_l - r_lo - ((j_lo/6) * T**3) - ((a_lo/2) * T**2) - (v_lo * T))))
+    gamma_2m = (1/(T)) * np.abs(np.exp(((1j*m*w_p)/const.c)*(r_l - r_lo - ((a_lo/2) * T**2) - (v_lo * T)))) # efficiency factor
+    gamma_3m = (1/(T)) * np.abs(np.exp(((1j*m*w_p)/const.c)*(r_l - r_lo - ((j_lo/6) * T**3) - ((a_lo/2) * T**2) - (v_lo * T)))) # relative efficiency factor
 
     # return the gamma factors so we can check if the pulsar is detected with its given eccentricity
     # if the returned numbers (gamma_..**2) are 1, pulsar has been detected
@@ -217,8 +248,6 @@ def S_min(M, P_orb, e, P, P_dot, B, x, y, z, vx, vy, vz, L, T_rec, d_f, n_chan, 
     """
 
     DM = DM_fnct(x, y, z) # dispersion measure in the direction of the pulsar, Units: pc/cm^3
-    # NOTE: need to correct the units to match those of DM_0 (m^-3??)
-    DM = DM * const.parsec * ((1e2)**3) # new units, m^-3
 
     tau_scatt = tau_scatt_fnct(DM, freq) # ISM scattering time
 
@@ -226,11 +255,9 @@ def S_min(M, P_orb, e, P, P_dot, B, x, y, z, vx, vy, vz, L, T_rec, d_f, n_chan, 
 
     T_sky = T_sky_fnct(x, y, z, freq) # get the sky temperature in the direction of the pulsar
 
-    F, D = flux(L, x, y, z) # get the flux of the pulsar Units: F (mJy), D (Kpc)
+    F, D = flux(L, x, y, z) # get the flux of the pulsar (Units: F (mJy), D (Kpc))
 
-    # gamma_1m_sq, gamma_2m_sq, gamma_3m_sq = eccentricity(P, a, e, i, t_int, . . .)
-
-    W_i = P*0.05 # fixed duty cycle in paper, seconds
+    W_i = P*0.05 # fixed duty cycle in paper (Units: seconds)
     # compute the effective pulse width
     We = np.sqrt(W_i**2 + tau_samp**2 + (tau_samp*(DM/DM_0))**2 + tau_scatt**2) # Units: seconds
 
@@ -242,23 +269,22 @@ def S_min(M, P_orb, e, P, P_dot, B, x, y, z, vx, vy, vz, L, T_rec, d_f, n_chan, 
         SNR = F / np.sqrt(np.pi / 2) / np.sqrt(We / (P - We)) / (T_rec + T_sky) * (G * np.sqrt(npol * d_f * t_int))
 
     # compute the minimum flux (S_min)
+    # NOTE: what are the units of S_min??? Flux is in mJy, do we need to convert one???
     S_min = beta*((SNmin*(T_rec+T_sky))/(G*np.sqrt(npol*t_int*(d_f/1e6))))*np.sqrt(We/(P-We))
 
     return S_min, F, D, gamma_1m, gamma_2m, gamma_3m
 
-def f_beaming(p):
+def f_beaming(P):
     """
     Computes the pulsar beaming fraction. It should return a result between 0 and 1.
 
     Input:
-        p, period of the pulsar (seconds)
+        P, period of the pulsar (seconds)
     Returns:
         f_b, pulsar beaming fraction
     """
 
     # beaming fraction model, P must be entered in seconds
-    f_b = 0.09*np.log(P/10)**2+0.03 # is the log in this equation log base 10????
+    f_b = 0.09*np.log(P/10)**2+0.03 # NOTE: is the log in this equation log base 10????
 
-    if f_b>1 or f_b<0: # check to make sure that the beaming fraction is in the range that it should be within
-        print("Error: beaming fraction is not within parameters. f_b =", f_b)
     return f_b
