@@ -36,8 +36,8 @@ def DM_fnct(x, y, z):
     DM, tau_sc = pygedm.dist_to_dm((l, b), dist = d, nu=(freq/1e3)) # Units: DM (pc / cm^3), tau_sc (GHz)
     tau_sc = tau_sc*1e3 # convert tau_sc to MHz timescale
 
-    # NOTE: need to correct the units to match those of DM_0 (s^2 m^-3??)
-    DM = DM * const.parsec * ((1e2)**3) # new units, m^-3
+    # DEBATRI need to correct the units to match those of DM_0 (s^2 m^-3?)
+    DM = DM * const.parsec * ((1e2)**3) # m^-3
 
     return DM, tau_sc
 
@@ -53,8 +53,9 @@ def tau_scatt_fnct(DM, freq):
     Returns:
     tau_scatt, ISM scattering time (seconds)
     """
-    # NOTE: need to check what units need to go in here since unit analysis will not work with log10.
+    # DEBATRI what units are used in this equation? It seems to be a scaling relation for tau_scatt so it probably requires specific units for it to work properly but they are not stated where it is defined as t_scatter_fnct2 in pulsar_survey_functions.c.
     tau_scatt = -6.46 + 0.154 * np.log10(DM) + 1.07 * np.log10(DM) ** 2 - 3.86 * np.log10(freq / 1e3)
+
     tau_scatt = 10**tau_scatt # ms
     tau_scatt = tau_scatt * 1e-3 # convert to seconds
     return tau_scatt
@@ -76,7 +77,12 @@ def DM0_fnct(freq, d_f, n_chan, tau_samp):
     """
     wavelength=const.c/(freq * 1e6) # m
     # printf("wavelength=%3.3f\n", % wavelength)
-    DM_0 = 1000.0 *tau_samp*((3e2/wavelength)**3)/(8.3e6*(d_f/n_chan)) # NOTE: units ??? s^2 m^-3 ???, should be m^-3 ????
+
+    # DEBATRI the units of DM_0 look like s^2 m^-3, should they be m^-3?
+    DM_0 = 1000.0 *tau_samp*((3e2/wavelength)**3)/(8.3e6*(d_f/n_chan))
+
+    # The following is dm0 copied from survey.c:
+    # dm0 = 1000.0*s.t_samp*pow(3e2/wavelength,3)/(8.3e6*(s.receiverBW/s.n_chan ))
     return DM_0
 
 def T_sky_fnct(x, y, z, freq):
@@ -96,7 +102,7 @@ def T_sky_fnct(x, y, z, freq):
     # Sky temperature at 408 MHz
     s = skytemp.SkyTemp(l, b, '.\\skytempy\\haslam408_ds_Remazeilles2014.fits') # get the skytemp information from the fits file
     T_sky = s.get_temp(freq) # get the temperature from the output, freq units in MHz
-    # NOTE: what are the units of Tsky?
+    # DEBATRI what are the units of Tsky?
     return T_sky
 
 def flux(L, x, y, z):
@@ -120,7 +126,6 @@ def E_fnct(E):
     """
     Define the equation to get the eccentric anomaly to be used in eccentricity() later.
     """
-
     return E - M - e * np.sin(E)
 
 def eccentricity(P_orb, M_1, M_2, e, x1, y1, z1, x2, y2, z2, vx1, vy1, vz1, vx2, vy2, vz2, i, T):
@@ -147,11 +152,14 @@ def eccentricity(P_orb, M_1, M_2, e, x1, y1, z1, x2, y2, z2, vx1, vy1, vz1, vx2,
 
         gamma_3m_sq, ratio of the highest power of the pulsar for the mth harmonic when higher order terms than jerk are non-zero to when they are zero
 
-    NOTE: Need to check units!!
-
-    NOTE potential issues:
-        - what should we use for m and t? (np.linspace(1, 20, 20) or something similar?)
-        - will E_fnct work with M not being defined within its equation?
+    DEBATRI potential issues (marked by NOTE):
+        - line 179: do we need to consider the orbital inclination of the system
+        - line 184, 185: how do we get the epoch of periastron passage (T_p)?
+        - lines 184, 216: what should we use for m and t? (np.linspace(1, 20, 20) or something similar?)
+        - lines 190, 191: will E_fnct work with M not being defined within its equation?
+        - line 198: how to get the longitude of the periastron?
+        - line 216: what should be used for T, the duration of the observation
+        - lines 220, 221: would the efficiency and relative efficiency be useful? they will be difficult to get due to integrals.
 
     """
     # get the distance between the two objects in the binary orbit
@@ -176,7 +184,7 @@ def eccentricity(P_orb, M_1, M_2, e, x1, y1, z1, x2, y2, z2, vx1, vy1, vz1, vx2,
     M_0 = w_0 * T_p
 
     # solve for the eccentric anomaly numerically
-    # NOTE: I am note sure if fsolve will run the following without issue because M is not defined in E_funct
+    # NOTE: I am not sure if fsolve will run the following without issue because M is not defined in E_funct
     E_guess = 1 # may need to be changed depending on how large or small E is going to be
     E = fsolve(E_fnct, E_guess)
     E_0 = fsolve(E_fnct, E_guess)
@@ -265,11 +273,11 @@ def S_min(M, P_orb, e, P, P_dot, B, x, y, z, vx, vy, vz, L, T_rec, d_f, n_chan, 
     npol = 2
     if We >= P:
         SNR = 0
-    else: # NOTE the SNR ratio eq here does not match the north cap pulsar survey paper!!
+    else: # DEBATRI the SNR ratio eq here does not match the north cap pulsar survey paper!!
         SNR = F / np.sqrt(np.pi / 2) / np.sqrt(We / (P - We)) / (T_rec + T_sky) * (G * np.sqrt(npol * d_f * t_int))
 
     # compute the minimum flux (S_min)
-    # NOTE: what are the units of S_min??? Flux is in mJy, do we need to convert one???
+    # DEBATRI what are the units of S_min??? Flux is in mJy, S_min will not match this if we multiply by D**2
     S_min = beta*((SNmin*(T_rec+T_sky))/(G*np.sqrt(npol*t_int*(d_f/1e6))))*np.sqrt(We/(P-We))
 
     return S_min, F, D, gamma_1m, gamma_2m, gamma_3m
@@ -285,6 +293,6 @@ def f_beaming(P):
     """
 
     # beaming fraction model, P must be entered in seconds
-    f_b = 0.09*np.log(P/10)**2+0.03 # NOTE: is the log in this equation log base 10????
+    f_b = 0.09*np.log10(P/10)**2+0.03
 
     return f_b

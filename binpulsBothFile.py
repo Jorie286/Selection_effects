@@ -54,12 +54,9 @@ pulsar_data["S_min1"] = None
 pulsar_data["S_min2"] = None
 pulsar_data["f_beaming1"] = None
 pulsar_data["f_beaming2"] = None
-pulsar_data["gamma_1m_sq1"] = None
-pulsar_data["gamma_2m_sq1"] = None
-pulsar_data["gamma_3m_sq1"] = None
-pulsar_data["gamma_1m_sq2"] = None
-pulsar_data["gamma_2m_sq2"] = None
-pulsar_data["gamma_3m_sq2"] = None
+#pulsar_data["gamma_1m_sq"] = None
+#pulsar_data["gamma_2m_sq"] = None
+#pulsar_data["gamma_3m_sq"] = None
 pulsar_data["d_1"] = None
 pulsar_data["d_2"] = None
 
@@ -86,7 +83,7 @@ for i, row in p.iterrows:
 
             f_b2 = selection_effects.f_beaming(P_2)
 
-        gamma_1m_sq, gamma_2m_sq, gamma_3m_sq = selection_effects.eccentricity(P_orb, M_1, M_2, e, x1, y1, z1, x2, y2, z2, vx1, vy1, vz1, vx2, vy2, vz2, i, T) # NOTE: not sure what to input for i and T here
+        #gamma_1m_sq, gamma_2m_sq, gamma_3m_sq = selection_effects.eccentricity(P_orb, M_1, M_2, e, x1, y1, z1, x2, y2, z2, vx1, vy1, vz1, vx2, vy2, vz2, i, T) # NOTE: not sure what to input for i and T here
 
     else:
         # define each constant in the pulsar data as what it is for greater readability
@@ -112,9 +109,9 @@ for i, row in p.iterrows:
         pulsar_data["S_min2"][i] = S_min2
         pulsar_data["f_beaming1"][i] = f_b1
         pulsar_data["f_beaming2"][i] = f_b2
-        pulsar_data["gamma_1m_sq"][i] = gamma_1m_sq
-        pulsar_data["gamma_2m_sq"][i] = gamma_2m_sq
-        pulsar_data["gamma_3m_sq"][i] = gamma_3m_sq
+        #pulsar_data["gamma_1m_sq"][i] = gamma_1m_sq
+        #pulsar_data["gamma_2m_sq"][i] = gamma_2m_sq
+        #pulsar_data["gamma_3m_sq"][i] = gamma_3m_sq
         pulsar_data["d_1"][i] = d_1
         pulsar_data["d_2"][i] = d_2
 

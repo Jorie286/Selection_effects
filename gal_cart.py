@@ -3,8 +3,6 @@
 # import necessary packages and files
 import galpy
 
-# NOTE: some of these conversions will need to be checked to see if they are sun centered or galactocentric!!!
-
 def cart2gal(x, y, z):
     """
     Convert the given cartisian coordinates (x, y, z) to galactic coordinates (l, b, d).
