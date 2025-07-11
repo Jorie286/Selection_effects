@@ -265,6 +265,7 @@ def S_min(M, P_orb, e, P, P_dot, B, x, y, z, vx, vy, vz, L, T_rec, d_f, n_chan, 
 
     F, D = flux(L, x, y, z) # get the flux of the pulsar (Units: F (mJy), D (Kpc))
 
+    # DEBATRI, this does not match with the equation for W_i in the pulsar.c file
     W_i = P*0.05 # fixed duty cycle in paper (Units: seconds)
     # compute the effective pulse width
     We = np.sqrt(W_i**2 + tau_samp**2 + (tau_samp*(DM/DM_0))**2 + tau_scatt**2) # Units: seconds
