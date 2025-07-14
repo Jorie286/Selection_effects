@@ -46,20 +46,26 @@ except Exception as e:
 
 print("All inputs successfully processed!")
 
+# duplicate the orignal dataframe 2 times (one for each output) so we don't modify the orignal
+pulsar_data_out = p.copy()
+T_sky_test = p.copy()
 
 # create empty rows to store new data in
-pulsar_data["flux1"] = None
-pulsar_data["flux2"] = None
-pulsar_data["S_min1"] = None
-pulsar_data["S_min2"] = None
-pulsar_data["f_beaming1"] = None
-pulsar_data["f_beaming2"] = None
-#pulsar_data["gamma_1m_sq"] = None
-#pulsar_data["gamma_2m_sq"] = None
-#pulsar_data["gamma_3m_sq"] = None
-pulsar_data["d_1"] = None
-pulsar_data["d_2"] = None
-pulsar_data["T_sky"] = None
+pulsar_data_out["flux1"] = None
+pulsar_data_out["flux2"] = None
+pulsar_data_out["S_min1"] = None
+pulsar_data_out["S_min2"] = None
+pulsar_data_out["f_beaming1"] = None
+pulsar_data_out["f_beaming2"] = None
+#pulsar_data_out["gamma_1m_sq"] = None
+#pulsar_data_out["gamma_2m_sq"] = None
+#pulsar_data_out["gamma_3m_sq"] = None
+
+# create empty rows for T_sky output
+T_sky_test["S_min1_a"] = None
+T_sky_test["S_min2_a"] = None
+T_sky_test["Area"] = None
+T_sky_test["T_sky"] = None
 
 # iterate through each row of the simulated pulsar data and determine if the pulsar is detectable
 for i, row in p.iterrows:
@@ -100,21 +106,25 @@ for i, row in p.iterrows:
             f_b1 = selection_effects.f_beaming(P_1)
 
         # set all other variables that would be returned for a binary to none for a single star system
-        S_min2, flux2, gamma_1m_sq, gamma_2m_sq, gamma_3m_sq, d_2, f_b2 = None, None, None, None, None, None, None
+        S_min2, flux2, gamma_1m_sq, gamma_2m_sq, gamma_3m_sq, f_b2 = None, None, None, None, None, None, None
 
 
     if survey.s[-1](l, b) == 1: # check to see if the pulsar is within the survey's viewing area. If it is, save the info.
-        pulsar_data["flux1"][i] = flux1
-        pulsar_data["flux2"][i] = flux2
-        pulsar_data["S_min1"][i] = S_min1
-        pulsar_data["S_min2"][i] = S_min2
-        pulsar_data["f_beaming1"][i] = f_b1
-        pulsar_data["f_beaming2"][i] = f_b2
-        #pulsar_data["gamma_1m_sq"][i] = gamma_1m_sq
-        #pulsar_data["gamma_2m_sq"][i] = gamma_2m_sq
-        #pulsar_data["gamma_3m_sq"][i] = gamma_3m_sq
-        pulsar_data["Area"][i] = d**2
-        pulsar_data["T_sky"][i] = selection_effects.T_sky_fnct(x, y, z, freq)
+        pulsar_data_out["flux1"][i] = flux1
+        pulsar_data_out["flux2"][i] = flux2
+        pulsar_data_out["S_min1"][i] = S_min1
+        pulsar_data_out["S_min2"][i] = S_min2
+        pulsar_data_out["f_beaming1"][i] = f_b1
+        pulsar_data_out["f_beaming2"][i] = f_b2
+        #pulsar_data_out["gamma_1m_sq"][i] = gamma_1m_sq
+        #pulsar_data_out["gamma_2m_sq"][i] = gamma_2m_sq
+        #pulsar_data_out["gamma_3m_sq"][i] = gamma_3m_sq
 
-# save the updated pulsar_data to a new csv file
-pulsar_data.to_csv(output_name, index=False)
+        T_sky_test["S_min1_a"][i] = S_min1*(d**2)
+        T_sky_test["S_min2_a"][i] = S_min2*(d**2)
+        T_sky_test["Area"][i] = d**2
+        T_sky_test["T_sky"][i] = selection_effects.T_sky_fnct(x, y, z, freq)
+
+# save the updated pulsar data to two new csv files
+pulsar_data_out.to_csv(str(output_name), index=False)
+T_sky_test.to_csv("T_sky_test", index=False)

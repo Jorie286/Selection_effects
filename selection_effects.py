@@ -118,7 +118,7 @@ def flux(L, x, y, z):
         D, distance to the pulsar (Kpc)
     """
 
-    D = x-R0_Kpc # distance to pulsar (Kpc)
+    D = np.sqrt(((x-R0_Kpc)**2)+ (y**2) + (z**2)) # distance to pulsar (Kpc)
     F = L/(4*np.pi*(D**2)) # flux of the pulsar in (mJy)
     return F, D
 
@@ -253,7 +253,6 @@ def S_min(M, P_orb, e, a, P, P_dot, B, x, y, z, vx, vy, vz, L, T_rec, d_f, n_cha
         S_min, the lower limit of flux a simulated pulsar can have to be detected at a given S/N ratio
         F, flux (mJy)
         D, distance (Kpc)
-        gamma_1m_sq, gamma_2m_sq, gamma_3m_sq; numbers to check if the object is detectable with the given eccentricity
     """
 
     DM = DM_fnct(x, y, z) # dispersion measure in the direction of the pulsar, Units: pc/cm^3
@@ -278,14 +277,11 @@ def S_min(M, P_orb, e, a, P, P_dot, B, x, y, z, vx, vy, vz, L, T_rec, d_f, n_cha
     else: # DEBATRI the SNR ratio eq here does not match the north cap pulsar survey paper!!
         SNR = F / np.sqrt(np.pi / 2) / np.sqrt(We / (P - We)) / (T_rec + T_sky) * (G * np.sqrt(npol * d_f * t_int))
 
-    # get the pulsar binary eccentricity selection effects
-    #gamma_1m_sq, gamma_2m_sq, gamma_3m_sq = eccentricity(P_orb, M_1, M_2, e, x, y, z, vx, vy, vz, i, T)
-
     # compute the minimum flux (S_min)
     # DEBATRI what are the units of S_min??? Flux is in mJy, S_min will not match this if we multiply by D**2
-    S_min = beta*((SNmin*(T_rec+T_sky))/(G*np.sqrt(npol*t_int*(d_f/1e6))))*np.sqrt(We/(P-We))*(D**2)
+    S_min = beta*((SNmin*(T_rec+T_sky))/(G*np.sqrt(npol*t_int*(d_f/1e6))))*np.sqrt(We/(P-We))
 
-    return S_min, F, D#, gamma_1m_sq, gamma_2m_sq, gamma_3m_sq
+    return S_min, F, D
 
 def f_beaming(P):
     """
