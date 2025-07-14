@@ -128,7 +128,7 @@ def E_fnct(E):
     """
     return E - M - e * np.sin(E)
 
-def eccentricity(P_orb, M_1, M_2, e, x1, y1, z1, x2, y2, z2, vx1, vy1, vz1, vx2, vy2, vz2, i, T):
+def eccentricity(P_orb, M_1, M_2, e, x, y, z, vx, vy, vz, i, T):
     """
     Compute the effects eccentricity in a binary orbit has on the detectability of a pulsar. A pulsar is detected when (gamma_1m)^2, (gamma_2m)^2, (gamma_3m)^2 are maximized to 1.
 
@@ -223,7 +223,7 @@ def eccentricity(P_orb, M_1, M_2, e, x1, y1, z1, x2, y2, z2, vx1, vy1, vz1, vx2,
     # if the returned numbers (gamma_..**2) are 1, pulsar has been detected
     return gamma_1m**2, gamma_2m**2, gamma_3m**2
 
-def S_min(M, P_orb, e, P, P_dot, B, x, y, z, vx, vy, vz, L, T_rec, d_f, n_chan, freq, tau_samp, G, t_int, npol = 2, SNmin = 10, beta=1):
+def S_min(M, P_orb, e, a, P, P_dot, B, x, y, z, vx, vy, vz, L, T_rec, d_f, n_chan, freq, tau_samp, G, t_int, npol = 2, SNmin = 10, beta=1):
     """
     Compute the minimum flux that a pulsar can have and still be detectable.
 
@@ -231,6 +231,7 @@ def S_min(M, P_orb, e, P, P_dot, B, x, y, z, vx, vy, vz, L, T_rec, d_f, n_chan, 
         M, mass (M_sun)
         P_orb, orbital period (days)
         e, eccentricity
+        a, separation between the two objects (AU)
         P, rotational period (seconds)
         P_dot, change in rotational period (seconds)
         B, surface magnetic field (Tesla)
@@ -277,11 +278,14 @@ def S_min(M, P_orb, e, P, P_dot, B, x, y, z, vx, vy, vz, L, T_rec, d_f, n_chan, 
     else: # DEBATRI the SNR ratio eq here does not match the north cap pulsar survey paper!!
         SNR = F / np.sqrt(np.pi / 2) / np.sqrt(We / (P - We)) / (T_rec + T_sky) * (G * np.sqrt(npol * d_f * t_int))
 
+    # get the pulsar binary eccentricity selection effects
+    #gamma_1m_sq, gamma_2m_sq, gamma_3m_sq = eccentricity(P_orb, M_1, M_2, e, x, y, z, vx, vy, vz, i, T)
+
     # compute the minimum flux (S_min)
     # DEBATRI what are the units of S_min??? Flux is in mJy, S_min will not match this if we multiply by D**2
-    S_min = beta*((SNmin*(T_rec+T_sky))/(G*np.sqrt(npol*t_int*(d_f/1e6))))*np.sqrt(We/(P-We))
+    S_min = beta*((SNmin*(T_rec+T_sky))/(G*np.sqrt(npol*t_int*(d_f/1e6))))*np.sqrt(We/(P-We))*(D**2)
 
-    return S_min, F, D, gamma_1m, gamma_2m, gamma_3m
+    return S_min, F, D#, gamma_1m_sq, gamma_2m_sq, gamma_3m_sq
 
 def f_beaming(P):
     """
