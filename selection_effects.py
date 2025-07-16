@@ -14,7 +14,7 @@ from skytempy import skytemp
 # astrophysical constants
 R0_Kpc=8.5 # Kpc, distance Sun-Galaxy Center
 
-def DM_fnct(x, y, z):
+def DM_fnct(x, y, z, freq):
     """
     Get the dispersion measure of the pulsar.
 
@@ -33,13 +33,13 @@ def DM_fnct(x, y, z):
     d = d * 1e3 # convert d from kpc to pc
 
     # d needs to be in pc for the pygedm function
-    DM, tau_sc = pygedm.dist_to_dm((l, b), dist = d, nu=(freq/1e3)) # Units: DM (pc / cm^3), tau_sc (GHz)
-    tau_sc = tau_sc*1e3 # convert tau_sc to MHz timescale
+    DM, tau_sc = pygedm.dist_to_dm(l, b, dist = d, nu=(freq/1e3)) # Units: DM (pc / cm^3), tau_sc (GHz)
+    # the values of DM and tau_sc have units attached to them when they are returned by dist_to_dm, remove these
+    DM, tau_sc = str(DM).split()[0], str(tau_sc).split()[0]
 
-    # DEBATRI need to correct the units to match those of DM_0 (s^2 m^-3?)
-    DM = DM * const.parsec * ((1e2)**3) # m^-3
+    tau_sc = float(tau_sc)*1e3 # convert tau_sc to MHz timescale
 
-    return DM, tau_sc
+    return float(DM), tau_sc
 
 def tau_scatt_fnct(DM, freq):
     """
@@ -73,7 +73,7 @@ def DM0_fnct(freq, d_f, n_chan, tau_samp):
 
     Returns:
     --------
-    DM_0, diagonal dispersion measure
+    DM_0, diagonal dispersion measure (pc cm^-3)
     """
     wavelength=const.c/(freq * 1e6) # m
     # printf("wavelength=%3.3f\n", % wavelength)
@@ -96,11 +96,11 @@ def T_sky_fnct(x, y, z, freq):
 
     Returns:
     --------
-    T_sky, sky temperature in the direction of the puslar
+    T_sky, sky temperature in the direction of the puslar (Kelvin)
     """
     l, b, d = gal_cart.cart2gal(x, y, z) # galactic coordinates of the puslar, Units: l (rad), b (rad), d (kpc)
     # Sky temperature at 408 MHz
-    s = skytemp.SkyTemp(l, b, '.\\skytempy\\haslam408_ds_Remazeilles2014.fits') # get the skytemp information from the fits file
+    s = skytemp.SkyTemp(l, b, r"./skytempy/haslam408_ds_Remazeilles2014.fits") # get the skytemp information from the fits file
     T_sky = s.get_temp(freq) # get the temperature from the output, freq units in MHz
     # DEBATRI what are the units of Tsky?
     return T_sky
@@ -255,13 +255,13 @@ def S_min(M, P_orb, e, a, P, P_dot, B, x, y, z, vx, vy, vz, L, T_rec, d_f, n_cha
         D, distance (Kpc)
     """
 
-    DM = DM_fnct(x, y, z) # dispersion measure in the direction of the pulsar, Units: pc/cm^3
+    DM, tau_sc = DM_fnct(x, y, z, freq) # dispersion measure in the direction of the pulsar, Units: pc/cm^3
 
     tau_scatt = tau_scatt_fnct(DM, freq) # ISM scattering time
 
     DM_0 = DM0_fnct(freq, d_f, n_chan, tau_samp) # diagonal dispersion measure of the survey
 
-    T_sky = T_sky_fnct(x, y, z, freq) # get the sky temperature in the direction of the pulsar
+    T_sky = T_sky_fnct(x, y, z, freq) # get the sky temperature in the direction of the pulsar (Kelvin)
 
     F, D = flux(L, x, y, z) # get the flux of the pulsar (Units: F (mJy), D (Kpc))
 
@@ -279,7 +279,7 @@ def S_min(M, P_orb, e, a, P, P_dot, B, x, y, z, vx, vy, vz, L, T_rec, d_f, n_cha
 
     # compute the minimum flux (S_min)
     # DEBATRI what are the units of S_min??? Flux is in mJy, S_min will not match this if we multiply by D**2
-    S_min = beta*((SNmin*(T_rec+T_sky))/(G*np.sqrt(npol*t_int*(d_f/1e6))))*np.sqrt(We/(P-We))
+    S_min = beta*((SNmin*(T_rec+T_sky))/(G*np.sqrt(npol*t_int*(d_f/1e6))))*np.sqrt(We/(P-We)) # Units: mJy
 
     return S_min, F, D
 
@@ -294,6 +294,6 @@ def f_beaming(P):
     """
 
     # beaming fraction model, P must be entered in seconds
-    f_b = 0.09*np.log10(P/10)**2+0.03
+    f_b = 0.09*np.log10(P.clip(1e-10)/10)**2+0.03
 
     return f_b

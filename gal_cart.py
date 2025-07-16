@@ -2,6 +2,7 @@
 
 # import necessary packages and files
 import galpy
+import galpy.util.coords
 
 def cart2gal(x, y, z):
     """
