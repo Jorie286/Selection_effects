@@ -18,7 +18,7 @@ def DM_fnct(x, y, z, freq):
     """
     Get the dispersion measure of the pulsar.
 
-    Inputs
+    Inputs:
     -------
     x, y, z; cartesian coordinates for the position of the pulsar
     freq, observing frequency (MHz)
