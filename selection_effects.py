@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # radio selection effects functions
 
 # import necessary packages
@@ -616,4 +615,3 @@ def f_beaming(P):
     f_b = 0.09*np.log10(P.clip(1e-10)/10)**2+0.03
 
     return f_b
->>>>>>> refs/remotes/origin/main

@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # equivalent file of a binpuls____.c file
 
 # import necessary packages
@@ -280,4 +279,3 @@ for i, row in p.iterrows():
 # save the updated pulsar data to two new csv files
 pulsar_data_out.to_csv(str(output_name), index=False, sep=";")
 T_sky_test.to_csv("T_sky_test.dat", index=False, sep=";")
->>>>>>> refs/remotes/origin/main
