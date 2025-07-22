@@ -30,10 +30,9 @@ def DM_fnct(x, y, z, freq):
     """
 
     l, b, d = gal_cart.cart2gal(x, y, z) # Units: l (rad), b (rad), d (kpc)
-    d = d * 1e3 # convert d from kpc to pc
 
     # d needs to be in pc for the pygedm function
-    DM, tau_sc = pygedm.dist_to_dm(l, b, dist = d, nu=(freq/1e3)) # Units: DM (pc / cm^3), tau_sc (GHz)
+    DM, tau_sc = pygedm.dist_to_dm((l*(180/np.pi)), (b*(180/np.pi)), dist = d*1e3, nu=(freq/1e3)) # Units: DM (pc / cm^3), tau_sc (GHz)
     # the values of DM and tau_sc have units attached to them when they are returned by dist_to_dm, remove these
     DM, tau_sc = str(DM).split()[0], str(tau_sc).split()[0]
 
@@ -102,7 +101,6 @@ def T_sky_fnct(x, y, z, freq):
     # Sky temperature at 408 MHz
     s = skytemp.SkyTemp(l, b, r"./skytempy/haslam408_ds_Remazeilles2014.fits") # get the skytemp information from the fits file
     T_sky = s.get_temp(freq) # get the temperature from the output, freq units in MHz
-    # DEBATRI what are the units of Tsky?
     return T_sky
 
 def flux(L, x, y, z):
