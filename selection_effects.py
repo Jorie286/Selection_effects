@@ -12,7 +12,7 @@ import survey
 from skytempy import skytemp
 
 # astrophysical constants
-R0_Kpc=8.5 # Kpc, distance Sun-Galaxy Center
+R0_Kpc=8.0 # Kpc, distance Sun-Galaxy Center
 
 def DM_fnct(x, y, z, freq):
     """
@@ -54,7 +54,8 @@ def tau_scatt_fnct(DM, freq):
     tau_scatt, ISM scattering time (seconds)
     """
     # DEBATRI what units are used in this equation? It seems to be a scaling relation for tau_scatt so it probably requires specific units for it to work properly but they are not stated where it is defined as t_scatter_fnct2 in pulsar_survey_functions.c.
-    tau_scatt = -6.46 + 0.154 * np.log10(DM) + 1.07 * np.log10(DM) ** 2 - 3.86 * np.log10(freq / 1e3)
+    # NOTE: An equation for tau_scatt also appears in Pulsar Astronomy book pg 37 eq 3.9!!
+    tau_scatt = -6.46 + 0.154 * np.log10(DM) + 1.07 * (np.log10(DM) ** 2) - 3.86 * np.log10(freq / 1e3)
 
     tau_scatt = 10**tau_scatt # ms
     tau_scatt = tau_scatt * 1e-3 # convert to seconds
@@ -78,7 +79,6 @@ def DM0_fnct(freq, d_f, n_chan, tau_samp):
     wavelength=const.c/(freq * 1e6) # m
     # printf("wavelength=%3.3f\n", % wavelength)
 
-    # DEBATRI the units of DM_0 look like s^2 m^-3, should they be m^-3?
     DM_0 = 1000.0 *tau_samp*((3e2/wavelength)**3)/(8.3e6*(d_f/n_chan))
 
     # The following is dm0 copied from survey.c:
@@ -119,8 +119,9 @@ def flux(L, x, y, z):
     """
 
     D = np.sqrt(((x-R0_Kpc)**2)+ (y**2) + (z**2)) # distance to pulsar (Kpc)
-    F = L/(4*np.pi*(D**2)) # flux of the pulsar in (mJy)
-    return F, D
+    Area = D**2 # Kpc^2
+    F = L/(4*np.pi*Area) # flux of the pulsar in (mJy)
+    return F, D, Area
 
 def E_fnct(E):
     """
@@ -263,13 +264,20 @@ def S_min(M, P_orb, e, a, P, P_dot, B, x, y, z, vx, vy, vz, L, T_rec, d_f, n_cha
 
     T_sky = T_sky_fnct(x, y, z, freq) # get the sky temperature in the direction of the pulsar (Kelvin)
 
-    F, D = flux(L, x, y, z) # get the flux of the pulsar (Units: F (mJy), D (Kpc))
+    F, D, Area = flux(L, x, y, z) # get the flux of the pulsar (Units: F (mJy), D (Kpc))
 
     # DEBATRI, this does not match with the equation for W_i in the pulsar.c file
-    W_i = P*0.05 # fixed duty cycle in paper (Units: seconds)
+    #W_i = P*0.05 # fixed duty cycle in paper (Units: seconds)
+    #W_i = (P**0.27)*0.05 # (Units: seconds), from https://iopscience.iop.org/article/10.3847/1538-4357/ab75e2/pdf
+
+    # from C code
+    FWHM=0.04
+    W_i = FWHM*P
+
     # compute the effective pulse width
     We = np.sqrt(W_i**2 + tau_samp**2 + (tau_samp*(DM/DM_0))**2 + tau_scatt**2) # Units: seconds
-
+    print("We", We)
+    print("P", P)
     # get the S/N ratio of the pulsar data
     npol = 2
     if We >= P:
@@ -277,11 +285,14 @@ def S_min(M, P_orb, e, a, P, P_dot, B, x, y, z, vx, vy, vz, L, T_rec, d_f, n_cha
     else: # DEBATRI the SNR ratio eq here does not match the north cap pulsar survey paper!!
         SNR = F / np.sqrt(np.pi / 2) / np.sqrt(We / (P - We)) / (T_rec + T_sky) * (G * np.sqrt(npol * d_f * t_int))
 
-    # compute the minimum flux (S_min)
-    # DEBATRI what are the units of S_min??? Flux is in mJy, S_min will not match this if we multiply by D**2
-    S_min = beta*((SNmin*(T_rec+T_sky))/(G*np.sqrt(npol*t_int*(d_f/1e6))))*np.sqrt(We/(P-We)) # Units: mJy
+    if We>=P:
+        S_min = 9.99e9
+    else:
+        # compute the minimum flux (S_min)
+        # DEBATRI what are the units of S_min??? Flux is in mJy, S_min will not match this if we multiply by D**2
+        S_min = beta*((SNmin*(T_rec+T_sky))/(G*np.sqrt(npol*t_int*(d_f/1e6))))*np.sqrt(We/(P-We)) # Units: mJy
 
-    return S_min, F, D
+    return S_min, F, Area
 
 def f_beaming(P):
     """
