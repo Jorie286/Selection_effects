@@ -4,7 +4,7 @@
 import galpy
 import galpy.util.coords
 
-def cart2gal(x, y, z):
+def cart2gal(x, y, z, degree=False):
     """
     Convert the given cartisian coordinates (x, y, z) to galactic coordinates (l, b, d).
 
@@ -12,6 +12,7 @@ def cart2gal(x, y, z):
         x, cartisian x coordinate
         y, cartisian y coordinate
         z, cartisian z coordinate
+        degree, True if the input be returned in degrees (default, degree=False)
 
     Returns:
         l, galactic l (longitude) coordinate
@@ -19,7 +20,7 @@ def cart2gal(x, y, z):
         d, galactic d (distance) coordinate
     """
 
-    lbd = galpy.util.coords.XYZ_to_lbd(x, y, z)
+    lbd = galpy.util.coords.XYZ_to_lbd(x, y, z, degree=degree)
     l = lbd[0]
     b = lbd[1]
     d = lbd[2]

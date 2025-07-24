@@ -79,21 +79,20 @@ for i, row in p.iterrows():
         # check to see if each object is a neutron star, if it is not, save values as None, else compute the values
         if P_1 == "NaN":
             S_min1, flux1, area, f_b1 = None, None, None, None
-            print("None")
         else:
             S_min1, flux1, area = selection_effects.S_min(M_1, P_orb, e, a, P_1, P_dot1, B_1, x, y, z, vx, vy, vz, L1, T_rec, d_f, n_chan, freq, tau_samp, G, t_int)
-            print("S_min1", S_min1)
             print("Area", area)
+            print("S_min1", S_min1)
+            print("S_min1*area", S_min1*area)
 
             f_b1 = selection_effects.f_beaming(P_1)
 
         if P_2 == "NaN":
             S_min2, flux2, area, f_b2 = None, None, None, None
-            print(P_2, "None")
         else:
             S_min2, flux2, area = selection_effects.S_min(M_2, P_orb, e, a, P_2, P_dot2, B_2, x, y, z, vx, vy, vz, L2, T_rec, d_f, n_chan, freq, tau_samp, G, t_int)
-            print("S_min_2", S_min2)
-            print("Area", area)
+            print("S_min2", S_min2)
+            print("S_min_2*area", S_min2*area)
 
             f_b2 = selection_effects.f_beaming(P_2)
 

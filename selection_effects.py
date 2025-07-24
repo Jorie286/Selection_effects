@@ -12,7 +12,7 @@ import survey
 from skytempy import skytemp
 
 # astrophysical constants
-R0_Kpc=8.0 # Kpc, distance Sun-Galaxy Center
+R0_Kpc=8.5 # Kpc, distance Sun-Galaxy Center
 
 def DM_fnct(x, y, z, freq):
     """
@@ -20,24 +20,21 @@ def DM_fnct(x, y, z, freq):
 
     Inputs:
     -------
-    x, y, z; cartesian coordinates for the position of the pulsar
+    x, y, z; cartesian coordinates for the position of the pulsar (Kpc)
     freq, observing frequency (MHz)
 
     Returns:
     --------
     dm, the dispersion measure of the pulsar in the given direction. (pc / cm^3)
-    tau_sc, scattering timescale at 1 MHz (from pygedm dist_to_dm docs)
+    tau_sc, scattering timescale at 1 MHz, units: seconds (from pygedm dist_to_dm docs)
     """
 
-    l, b, d = gal_cart.cart2gal(x, y, z) # Units: l (rad), b (rad), d (kpc)
+    l, b, d = gal_cart.cart2gal(x, y, z, degree=True) # Units: l (degrees), b (degrees), d (kpc)
 
     # d needs to be in pc for the pygedm function
-    DM, tau_sc = pygedm.dist_to_dm((l*(180/np.pi)), (b*(180/np.pi)), dist = d*1e3, nu=(freq/1e3)) # Units: DM (pc / cm^3), tau_sc (GHz)
+    DM, tau_sc = pygedm.dist_to_dm(l, b, dist = d*1e3, nu=(freq/1e3)) # Units: DM (pc / cm^3), tau_sc (GHz)
     # the values of DM and tau_sc have units attached to them when they are returned by dist_to_dm, remove these
     DM, tau_sc = str(DM).split()[0], str(tau_sc).split()[0]
-
-    tau_sc = float(tau_sc)*1e3 # convert tau_sc to MHz timescale
-
     return float(DM), tau_sc
 
 def tau_scatt_fnct(DM, freq):
@@ -46,10 +43,11 @@ def tau_scatt_fnct(DM, freq):
 
     Input:
     ------
-    DM, dispersion measure of the pulsar
+    DM, dispersion measure of the pulsar (pc/cm^3)
     freq, survey frequency (MHz)
 
     Returns:
+    --------
     tau_scatt, ISM scattering time (seconds)
     """
     # DEBATRI what units are used in this equation? It seems to be a scaling relation for tau_scatt so it probably requires specific units for it to work properly but they are not stated where it is defined as t_scatter_fnct2 in pulsar_survey_functions.c.
@@ -75,11 +73,11 @@ def DM0_fnct(freq, d_f, n_chan, tau_samp):
     --------
     DM_0, diagonal dispersion measure (pc cm^-3)
     """
-    wavelength=const.c/(freq * 1e6) # m
+    # NOTE: should this be converted to cm so that DM_0 matches with DM???
+    wavelength=const.c/(freq * 1e6) # Units: m
     # printf("wavelength=%3.3f\n", % wavelength)
 
-    DM_0 = 1000.0 *tau_samp*((3e2/wavelength)**3)/(8.3e6*(d_f/n_chan))
-
+    DM_0 = 1000.0 * tau_samp *((3e2/wavelength)**3)/(8.3e6*(d_f/n_chan))
     # The following is dm0 copied from survey.c:
     # dm0 = 1000.0*s.t_samp*pow(3e2/wavelength,3)/(8.3e6*(s.receiverBW/s.n_chan ))
     return DM_0
@@ -90,7 +88,7 @@ def T_sky_fnct(x, y, z, freq):
 
     Input:
     ------
-    x, y, x; cartesian coordinates of the pulsar
+    x, y, x; cartesian coordinates of the pulsar (Kpc)
     freq, survey frequency (MHz)
 
     Returns:
@@ -108,17 +106,19 @@ def flux(L, x, y, z):
     Compute the flux of the pulsar.
 
     Input:
-        L, luminosity of the modeled pulsar, an input given by user (Watts ???)
-        x, y, z; cartesian coordinates
+        L, luminosity of the modeled pulsar, an input given by user (mJy Kpc^2)
+        x, y, z; cartesian coordinates (Kpc)
 
     Returns:
         F, flux of the pulsar (mJy)
         D, distance to the pulsar (Kpc)
+        Area, distance to the pulsar squared (Kpc^2)
     """
 
     D = np.sqrt(((x-R0_Kpc)**2)+ (y**2) + (z**2)) # distance to pulsar (Kpc)
     Area = D**2 # Kpc^2
     F = L/(4*np.pi*Area) # flux of the pulsar in (mJy)
+    print("Flux", F)
     return F, D, Area
 
 def E_fnct(E):
@@ -234,48 +234,46 @@ def S_min(M, P_orb, e, a, P, P_dot, B, x, y, z, vx, vy, vz, L, T_rec, d_f, n_cha
         P, rotational period (seconds)
         P_dot, change in rotational period (seconds)
         B, surface magnetic field (Tesla)
-        x, y, z; cartesian coordinates
-        vx, vy, vz; change in position of each cartesian
+        x, y, z; cartesian coordinates (Kpc)
+        vx, vy, vz; change in position of each cartesian (km/s)
         L, luminosity (mJy Kpc^2)
-        T_rec, receiver temperature
+        T_rec, receiver temperature (Kelvin)
         d_f, receiver bandwidth (MHz)
         n_chan, number of channels in the survey
         freq, observing frequency (MHz)
         tau_samp, sampling time (seconds)
-        G, gain of the telescope
+        G, gain of the telescope (Kelvin/ mJy) # NOTE: are these the units that gain is in in survey.py???
         t_int, integration time (seconds)
         npol, number of polarizations in the detector (automatically set to 2)
         SNmin, minimum detection threshold (automatically set to 10)
         beta, parameter to account for the errors that increase the noise in the signal (automatically set to 1)
 
     Returns:
-        S_min, the lower limit of flux a simulated pulsar can have to be detected at a given S/N ratio
+        S_min, the lower limit of flux a simulated pulsar can have to be detected at a given S/N ratio (mJy)
         F, flux (mJy)
         D, distance (Kpc)
     """
 
-    DM, tau_sc = DM_fnct(x, y, z, freq) # dispersion measure in the direction of the pulsar, Units: pc/cm^3
+    DM, tau_sc = DM_fnct(x, y, z, freq) # dispersion measure in the direction of the pulsar, Units: pc/cm^3, seconds
 
-    tau_scatt = tau_scatt_fnct(DM, freq) # ISM scattering time
+    tau_scatt = tau_scatt_fnct(DM, freq) # ISM scattering time, Units: seconds
 
     DM_0 = DM0_fnct(freq, d_f, n_chan, tau_samp) # diagonal dispersion measure of the survey
 
     T_sky = T_sky_fnct(x, y, z, freq) # get the sky temperature in the direction of the pulsar (Kelvin)
 
-    F, D, Area = flux(L, x, y, z) # get the flux of the pulsar (Units: F (mJy), D (Kpc))
+    F, D, Area = flux(L, x, y, z) # get the flux of the pulsar, Units: F (mJy), D (Kpc), Area (Kpc^2)
 
-    # DEBATRI, this does not match with the equation for W_i in the pulsar.c file
-    #W_i = P*0.05 # fixed duty cycle in paper (Units: seconds)
-    #W_i = (P**0.27)*0.05 # (Units: seconds), from https://iopscience.iop.org/article/10.3847/1538-4357/ab75e2/pdf
+    # DEBATRI, which of the following equations for W_i do we want to use?
+    W_i = P*0.05 # fixed duty cycle in paper, Units: seconds
+    #W_i = (P**0.27)*0.05 # Units: seconds, inside C code comment, from https://iopscience.iop.org/article/10.3847/1538-4357/ab75e2/pdf
 
     # from C code
-    FWHM=0.04
-    W_i = FWHM*P
+    #FWHM=0.04
+    #W_i = FWHM*P
 
     # compute the effective pulse width
     We = np.sqrt(W_i**2 + tau_samp**2 + (tau_samp*(DM/DM_0))**2 + tau_scatt**2) # Units: seconds
-    print("We", We)
-    print("P", P)
     # get the S/N ratio of the pulsar data
     npol = 2
     if We >= P:
@@ -287,8 +285,7 @@ def S_min(M, P_orb, e, a, P, P_dot, B, x, y, z, vx, vy, vz, L, T_rec, d_f, n_cha
         S_min = 9.99e9
     else:
         # compute the minimum flux (S_min)
-        # DEBATRI what are the units of S_min??? Flux is in mJy, S_min will not match this if we multiply by D**2
-        S_min = beta*((SNmin*(T_rec+T_sky))/(G*np.sqrt(npol*t_int*(d_f/1e6))))*np.sqrt(We/(P-We)) # Units: mJy
+        S_min = beta*((SNmin*(T_rec+T_sky))/(G*np.sqrt(npol*t_int*(d_f/1e6))))*np.sqrt(We/(P-We)) # units: mJy
 
     return S_min, F, Area
 
@@ -303,6 +300,6 @@ def f_beaming(P):
     """
 
     # beaming fraction model, P must be entered in seconds
-    f_b = 0.09*np.log10(P.clip(1e-10)/10)**2+0.03
+    f_b = 0.09*((np.log10(P.clip(1e-10)/10))**2)+0.03
 
     return f_b
