@@ -1,5 +1,8 @@
 # equivalent file of a binpuls____.c file
 
+# run using the following:
+# python binpulsBothFile.py SKA_2100 Debatri_Jorie_input_dnsCreated.dat binary out_file.dat
+
 # import necessary packages
 import sys
 import numpy as np
@@ -34,7 +37,7 @@ else:
     s = survey.surv_array[np.where(survey.surv_array[:, 0] == str(survey_name))][0] # get the row of data for the specific survey
 
     # define each constant in the survey array as what it is for greater readability
-    # units: none, ???, MHz, none, MHz, s, none, s
+    # units: none, Kelvin, MHz, none, MHz, s, none, s
     name, T_rec, d_f, n_chan, freq, tau_samp, G, t_int = s[0], s[1], s[2], s[3], s[4], s[5], s[6], s[7]
 
 try:
@@ -81,9 +84,8 @@ for i, row in p.iterrows():
             S_min1, flux1, area, f_b1 = None, None, None, None
         else:
             S_min1, flux1, area = selection_effects.S_min(M_1, P_orb, e, a, P_1, P_dot1, B_1, x, y, z, vx, vy, vz, L1, T_rec, d_f, n_chan, freq, tau_samp, G, t_int)
-            print("Area", area)
-            print("S_min1", S_min1)
-            print("S_min1*area", S_min1*area)
+            #print("Area", area)
+            #print("S_min1*area", S_min1*area)
 
             f_b1 = selection_effects.f_beaming(P_1)
 
@@ -91,8 +93,7 @@ for i, row in p.iterrows():
             S_min2, flux2, area, f_b2 = None, None, None, None
         else:
             S_min2, flux2, area = selection_effects.S_min(M_2, P_orb, e, a, P_2, P_dot2, B_2, x, y, z, vx, vy, vz, L2, T_rec, d_f, n_chan, freq, tau_samp, G, t_int)
-            print("S_min2", S_min2)
-            print("S_min_2*area", S_min2*area)
+            #print("S_min_2*area", S_min2*area)
 
             f_b2 = selection_effects.f_beaming(P_2)
 
@@ -115,7 +116,7 @@ for i, row in p.iterrows():
         S_min2, flux2, L2, gamma_1m_sq, gamma_2m_sq, gamma_3m_sq, f_b2 = None, None, None, None, None, None, None
 
     # get the galacitc coordinates of the object
-    l, b, D = gal_cart.cart2gal(x, y, z)
+    l, b, d = gal_cart.cart2gal(x, y, z, degree=True)
     if s[-1](l, b) == 1: # check to see if the pulsar is within the survey's viewing area. If it is, save the info.
         pulsar_data_out.loc[i, "S_min1*area"] = S_min1*area
         pulsar_data_out.loc[i, "S_min2*area"] = S_min2*area

@@ -118,7 +118,6 @@ def flux(L, x, y, z):
     D = np.sqrt(((x-R0_Kpc)**2)+ (y**2) + (z**2)) # distance to pulsar (Kpc)
     Area = D**2 # Kpc^2
     F = L/(4*np.pi*Area) # flux of the pulsar in (mJy)
-    print("Flux", F)
     return F, D, Area
 
 def E_fnct(E):
