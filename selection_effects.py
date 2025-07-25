@@ -264,6 +264,7 @@ def S_min(M, P_orb, e, a, P, P_dot, B, x, y, z, vx, vy, vz, L, T_rec, d_f, n_cha
     DM_0 = DM0_fnct(freq, d_f, n_chan, tau_samp) # diagonal dispersion measure of the survey
 
     T_sky = T_sky_fnct(x, y, z, freq) # get the sky temperature in the direction of the pulsar (Kelvin)
+    print("T_sky", T_sky)
 
     F, D, Area = flux(L, x, y, z) # get the flux of the pulsar, Units: F (mJy), D (Kpc), Area (Kpc^2)
 
@@ -302,7 +303,7 @@ def S_min(M, P_orb, e, a, P, P_dot, B, x, y, z, vx, vy, vz, L, T_rec, d_f, n_cha
     # get each SNR from the list
     SNR_05, SNR_27, SNR_fwhm = SNR_list
 
-    return S_min_05, S_min27, S_min_fwhm, F, Area, SNR_05, SNR_27, SNR_fwhm
+    return S_min_05, S_min_27, S_min_fwhm, F, Area, SNR_05, SNR_27, SNR_fwhm
 
 def f_beaming(P):
     """
