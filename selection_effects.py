@@ -54,6 +54,9 @@ def tau_scatt_fnct(DM, freq):
     # NOTE: An equation for tau_scatt also appears in Pulsar Astronomy book pg 37 eq 3.9!!
     tau_scatt = -6.46 + 0.154 * np.log10(DM) + 1.07 * (np.log10(DM) ** 2) - 3.86 * np.log10(freq / 1e3)
 
+    # tau_scatt from book:
+    #tau_scatt=((DM/1000)**3.5)*((400/nu_MHz)**4)
+
     tau_scatt = 10**tau_scatt # ms
     tau_scatt = tau_scatt * 1e-3 # convert to seconds
     return tau_scatt
@@ -248,9 +251,10 @@ def S_min(M, P_orb, e, a, P, P_dot, B, x, y, z, vx, vy, vz, L, T_rec, d_f, n_cha
         beta, parameter to account for the errors that increase the noise in the signal (automatically set to 1)
 
     Returns:
-        S_min, the lower limit of flux a simulated pulsar can have to be detected at a given S/N ratio (mJy)
+        S_min_05, S_min_27, S_min_fwhm; the lower limit of flux a simulated pulsar can have to be detected at a given S/N ratio (mJy) for three different functions of W_i
         F, flux (mJy)
         D, distance (Kpc)
+        SNR_05, SNR_27, SNR_fwhm; the signal to noise ratio of the pulsar data for three different functions of W_i
     """
 
     DM, tau_sc = DM_fnct(x, y, z, freq) # dispersion measure in the direction of the pulsar, Units: pc/cm^3, seconds
@@ -263,30 +267,42 @@ def S_min(M, P_orb, e, a, P, P_dot, B, x, y, z, vx, vy, vz, L, T_rec, d_f, n_cha
 
     F, D, Area = flux(L, x, y, z) # get the flux of the pulsar, Units: F (mJy), D (Kpc), Area (Kpc^2)
 
-    # DEBATRI, which of the following equations for W_i do we want to use?
-    W_i = P*0.05 # fixed duty cycle in paper, Units: seconds
-    #W_i = (P**0.27)*0.05 # Units: seconds, inside C code comment, from https://iopscience.iop.org/article/10.3847/1538-4357/ab75e2/pdf
+    # the three equations for W_i come from:
+        # fixed duty cycle in DNS paper, list index 0
+        # inside C code comment; from https://iopscience.iop.org/article/10.3847/1538-4357/ab75e2/pdf, list index 1
+        # from C code, list index 2
+    FWHM = 0.04
+    Wi_list = [P*0.05, (P**0.27)*0.05, FWHM*P]
+    S_min_list = []
+    SNR_list = []
 
-    # from C code
-    #FWHM=0.04
-    #W_i = FWHM*P
+    for W_i in Wi_list:
+        # compute the effective pulse width
+        We = np.sqrt(W_i**2 + tau_samp**2 + (tau_samp*(DM/DM_0))**2 + tau_scatt**2) # Units: seconds
 
-    # compute the effective pulse width
-    We = np.sqrt(W_i**2 + tau_samp**2 + (tau_samp*(DM/DM_0))**2 + tau_scatt**2) # Units: seconds
-    # get the S/N ratio of the pulsar data
-    npol = 2
-    if We >= P:
-        SNR = 0
-    else: # DEBATRI the SNR ratio eq here does not match the north cap pulsar survey paper!!
-        SNR = F / np.sqrt(np.pi / 2) / np.sqrt(We / (P - We)) / (T_rec + T_sky) * (G * np.sqrt(npol * d_f * t_int))
+        if We>=P:
+            S_min = 9.99e9
+        else:
+            # compute the minimum flux (S_min)
+            S_min = beta*((SNmin*(T_rec+T_sky))/(G*np.sqrt(npol*t_int*(d_f/1e6))))*np.sqrt(We/(P-We)) # units: mJy
+            # NOTE: is G in Kelvin/mJy????
+        S_min_list.append(S_min) # add each calculated S_min to the list
 
-    if We>=P:
-        S_min = 9.99e9
-    else:
-        # compute the minimum flux (S_min)
-        S_min = beta*((SNmin*(T_rec+T_sky))/(G*np.sqrt(npol*t_int*(d_f/1e6))))*np.sqrt(We/(P-We)) # units: mJy
+        # get the S/N ratio of the pulsar data
+        npol = 2
+        if We >= P:
+            SNR = 0
+        else: # DEBATRI the SNR ratio eq here does not match the north cap pulsar survey paper
+            SNR = F / np.sqrt(np.pi / 2) / np.sqrt(We / (P - We)) / (T_rec + T_sky) * (G * np.sqrt(npol * d_f * t_int))
+        SNR_list.append(SNR)
 
-    return S_min, F, Area
+    # get each S_min from the list
+    S_min_05, S_min_27, S_min_fwhm = S_min_list
+
+    # get each SNR from the list
+    SNR_05, SNR_27, SNR_fwhm = SNR_list
+
+    return S_min_05, S_min27, S_min_fwhm, F, Area, SNR_05, SNR_27, SNR_fwhm
 
 def f_beaming(P):
     """
