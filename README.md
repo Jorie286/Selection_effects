@@ -36,9 +36,13 @@ The surveys that are available to test for a pulsar's detectability include:
 - MeerKat
 - SKA_300 (t_int = 300 s)
 
-The repositories that are required to run this code include:
-- galpy
-- numpy
-- pygedm
-- scipy
+The repositories and versions that are required to run this code include:
+- python 3.10.18
+- galpy 1.7.2
+- numpy 1.26.4
+- pygedm 3.3.0
+- scipy 1.13.1
 - skytempy (necessary files included in a folder within the repository)
+- pandas 2.2.3
+- astropy 6.1.3
+- matplotlib 3.10.0

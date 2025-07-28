@@ -9,9 +9,9 @@ def cart2gal(x, y, z, degree=False):
     Convert the given cartisian coordinates (x, y, z) to galactic coordinates (l, b, d).
 
     Inputs:
-        x, cartisian x coordinate
-        y, cartisian y coordinate
-        z, cartisian z coordinate
+        x, cartisian x coordinate (kpc)
+        y, cartisian y coordinate (kpc)
+        z, cartisian z coordinate (kpc)
         degree, True if the input be returned in degrees (default, degree=False)
 
     Returns:
@@ -37,9 +37,9 @@ def gal2cart(l, b, d, x, y, z):
         d, galactic d (distance) coordinate
 
     Returns:
-        x, cartisian x coordinate
-        y, cartisian y coordinate
-        z, cartisian z cooordinate
+        x, cartisian x coordinate (kpc)
+        y, cartisian y coordinate (kpc)
+        z, cartisian z cooordinate (kpc)
     """
 
     xyz = galpy.util.coords.lbd_to_XYZ(l, b, d)

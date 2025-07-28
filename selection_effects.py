@@ -98,7 +98,7 @@ def T_sky_fnct(x, y, z, freq):
     --------
     T_sky, sky temperature in the direction of the puslar (Kelvin)
     """
-    l, b, d = gal_cart.cart2gal(x, y, z) # galactic coordinates of the puslar, Units: l (rad), b (rad), d (kpc)
+    l, b, d = gal_cart.cart2gal(x, y, z, degree=True) # galactic coordinates of the puslar, Units: l (rad), b (rad), d (kpc)
     # Sky temperature at 408 MHz
     s = skytemp.SkyTemp(l, b, r"./skytempy/haslam408_ds_Remazeilles2014.fits") # get the skytemp information from the fits file
     T_sky = s.get_temp(freq) # get the temperature from the output, freq units in MHz
@@ -258,15 +258,21 @@ def S_min(M, P_orb, e, a, P, P_dot, B, x, y, z, vx, vy, vz, L, T_rec, d_f, n_cha
     """
 
     DM, tau_sc = DM_fnct(x, y, z, freq) # dispersion measure in the direction of the pulsar, Units: pc/cm^3, seconds
+    #print("freq", freq)
+    #print("DM", DM)
 
     tau_scatt = tau_scatt_fnct(DM, freq) # ISM scattering time, Units: seconds
+    #print("tau_scatt", tau_scatt)
 
     DM_0 = DM0_fnct(freq, d_f, n_chan, tau_samp) # diagonal dispersion measure of the survey
+    #print("DM_0", DM_0)
 
-    T_sky = T_sky_fnct(x, y, z, freq) # get the sky temperature in the direction of the pulsar (Kelvin)
-    print("T_sky", T_sky)
+    T_sky = T_sky_fnct(-x, -y, z, freq) # get the sky temperature in the direction of the pulsar (Kelvin)
+    #print("T_sky", T_sky)
 
     F, D, Area = flux(L, x, y, z) # get the flux of the pulsar, Units: F (mJy), D (Kpc), Area (Kpc^2)
+    #print("F", F)
+    #print("Area", Area)
 
     # the three equations for W_i come from:
         # fixed duty cycle in DNS paper, list index 0
@@ -299,9 +305,11 @@ def S_min(M, P_orb, e, a, P, P_dot, B, x, y, z, vx, vy, vz, L, T_rec, d_f, n_cha
 
     # get each S_min from the list
     S_min_05, S_min_27, S_min_fwhm = S_min_list
+    #print("S_min_list", S_min_list)
 
     # get each SNR from the list
     SNR_05, SNR_27, SNR_fwhm = SNR_list
+    #print("SNR_list", SNR_list)
 
     return S_min_05, S_min_27, S_min_fwhm, F, Area, SNR_05, SNR_27, SNR_fwhm
 
