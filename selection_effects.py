@@ -102,6 +102,7 @@ def T_sky_fnct(x, y, z, freq):
     # Sky temperature at 408 MHz
     s = skytemp.SkyTemp(l, b, r"./skytempy/haslam408_ds_Remazeilles2014.fits") # get the skytemp information from the fits file
     T_sky = s.get_temp(freq) # get the temperature from the output, freq units in MHz
+    print("T_sky", T_sky)
     return T_sky
 
 def flux(L, x, y, z):
@@ -120,6 +121,8 @@ def flux(L, x, y, z):
 
     D = np.sqrt(((x-R0_Kpc)**2)+ (y**2) + (z**2)) # distance to pulsar (Kpc)
     Area = D**2 # Kpc^2
+    print("D", D)
+    print("Area", Area)
     F = L/(4*np.pi*Area) # flux of the pulsar in (mJy)
     return F, D, Area
 
