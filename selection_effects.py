@@ -50,7 +50,6 @@ def tau_scatt_fnct(DM, freq):
     --------
     tau_scatt, ISM scattering time (seconds)
     """
-    # DEBATRI what units are used in this equation? It seems to be a scaling relation for tau_scatt so it probably requires specific units for it to work properly but they are not stated where it is defined as t_scatter_fnct2 in pulsar_survey_functions.c.
     # NOTE: An equation for tau_scatt also appears in Pulsar Astronomy book pg 37 eq 3.9!!
     tau_scatt = -6.46 + 0.154 * np.log10(DM) + 1.07 * (np.log10(DM) ** 2) - 3.86 * np.log10(freq / 1e3)
 
@@ -76,7 +75,6 @@ def DM0_fnct(freq, d_f, n_chan, tau_samp):
     --------
     DM_0, diagonal dispersion measure (pc cm^-3)
     """
-    # NOTE: should this be converted to cm so that DM_0 matches with DM???
     wavelength=const.c/(freq * 1e6) # Units: m
     # printf("wavelength=%3.3f\n", % wavelength)
 
@@ -102,7 +100,6 @@ def T_sky_fnct(x, y, z, freq):
     # Sky temperature at 408 MHz
     s = skytemp.SkyTemp(l, b, r"./skytempy/haslam408_ds_Remazeilles2014.fits") # get the skytemp information from the fits file
     T_sky = s.get_temp(freq) # get the temperature from the output, freq units in MHz
-    print("T_sky", T_sky)
     return T_sky
 
 def flux(L, x, y, z):
@@ -121,8 +118,6 @@ def flux(L, x, y, z):
 
     D = np.sqrt(((x-R0_Kpc)**2)+ (y**2) + (z**2)) # distance to pulsar (Kpc)
     Area = D**2 # Kpc^2
-    print("D", D)
-    print("Area", Area)
     F = L/(4*np.pi*Area) # flux of the pulsar in (mJy)
     return F, D, Area
 
@@ -247,7 +242,7 @@ def S_min(M, P_orb, e, a, P, P_dot, B, x, y, z, vx, vy, vz, L, T_rec, d_f, n_cha
         n_chan, number of channels in the survey
         freq, observing frequency (MHz)
         tau_samp, sampling time (seconds)
-        G, gain of the telescope (Kelvin/ mJy) # NOTE: are these the units that gain is in in survey.py???
+        G, gain of the telescope (Kelvin/ Jy) # NOTE: are these the units that gain is in in survey.py???
         t_int, integration time (seconds)
         npol, number of polarizations in the detector (automatically set to 2)
         SNmin, minimum detection threshold (automatically set to 10)
@@ -294,8 +289,8 @@ def S_min(M, P_orb, e, a, P, P_dot, B, x, y, z, vx, vy, vz, L, T_rec, d_f, n_cha
             S_min = 9.99e9
         else:
             # compute the minimum flux (S_min)
-            S_min = beta*((SNmin*(T_rec+T_sky))/(G*np.sqrt(npol*t_int*(d_f/1e6))))*np.sqrt(We/(P-We)) # units: mJy
-            # NOTE: is G in Kelvin/mJy????
+            S_min = beta*((SNmin*(T_rec+T_sky))/((G*1e3)*np.sqrt(npol*t_int*(d_f/1e6))))*np.sqrt(We/(P-We)) # units: mJy
+            # DEBATRI: is G in Kelvin/Jy???? If it is, then the calculations are good, else there is factor of 1e3 missing.
         S_min_list.append(S_min) # add each calculated S_min to the list
 
         # get the S/N ratio of the pulsar data
@@ -308,11 +303,11 @@ def S_min(M, P_orb, e, a, P, P_dot, B, x, y, z, vx, vy, vz, L, T_rec, d_f, n_cha
 
     # get each S_min from the list
     S_min_05, S_min_27, S_min_fwhm = S_min_list
-    #print("S_min_list", S_min_list)
+    print("S_min_list", S_min_list)
 
     # get each SNR from the list
     SNR_05, SNR_27, SNR_fwhm = SNR_list
-    #print("SNR_list", SNR_list)
+    print("SNR_list", SNR_list)
 
     return S_min_05, S_min_27, S_min_fwhm, F, Area, SNR_05, SNR_27, SNR_fwhm
 
