@@ -253,6 +253,7 @@ def S_min(M, P_orb, e, a, P, P_dot, B, x, y, z, vx, vy, vz, L, T_rec, d_f, n_cha
         F, flux (mJy)
         D, distance (Kpc)
         SNR_05, SNR_27, SNR_fwhm; the signal to noise ratio of the pulsar data for three different functions of W_i
+        T_sky, sky temperature (Kelvin)
     """
 
     DM, tau_sc = DM_fnct(x, y, z, freq) # dispersion measure in the direction of the pulsar, Units: pc/cm^3, seconds
@@ -308,7 +309,7 @@ def S_min(M, P_orb, e, a, P, P_dot, B, x, y, z, vx, vy, vz, L, T_rec, d_f, n_cha
     # get each SNR from the list
     SNR_05, SNR_27, SNR_fwhm = SNR_list
 
-    return S_min_05, S_min_27, S_min_fwhm, F, Area, SNR_05, SNR_27, SNR_fwhm
+    return S_min_05, S_min_27, S_min_fwhm, F, Area, SNR_05, SNR_27, SNR_fwhm, T_sky
 
 def f_beaming(P):
     """
