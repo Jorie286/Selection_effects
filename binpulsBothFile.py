@@ -169,7 +169,7 @@ for i, row in p.iterrows():
         T_sky_test.loc[i, "S_min1_fwhm*area"] = S_min1_fwhm*area
         T_sky_test.loc[i, "S_min2_fwhm*area"] = S_min2_fwhm*area
         T_sky_test.loc[i, "Area"] = area
-        T_sky_test.loc[i, "T_sky"] = selection_effects.T_sky_fnct(-x, -y, z, freq)
+        T_sky_test.loc[i, "T_sky"] = selection_effects.T_sky_fnct(x, -y, z, freq)
 
 # save the updated pulsar data to two new csv files
 pulsar_data_out.to_csv(str(output_name), index=False, sep=";")
