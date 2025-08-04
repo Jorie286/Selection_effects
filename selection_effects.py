@@ -303,11 +303,9 @@ def S_min(M, P_orb, e, a, P, P_dot, B, x, y, z, vx, vy, vz, L, T_rec, d_f, n_cha
 
     # get each S_min from the list
     S_min_05, S_min_27, S_min_fwhm = S_min_list
-    print("S_min_list", S_min_list)
 
     # get each SNR from the list
     SNR_05, SNR_27, SNR_fwhm = SNR_list
-    print("SNR_list", SNR_list)
 
     return S_min_05, S_min_27, S_min_fwhm, F, Area, SNR_05, SNR_27, SNR_fwhm
 
