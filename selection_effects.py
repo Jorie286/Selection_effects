@@ -5,6 +5,7 @@ import numpy as np
 import scipy.constants as const
 from scipy.optimize import fsolve
 import pygedm
+import healpy as hp
 
 # get functions and constants from other files
 import gal_cart
@@ -97,8 +98,14 @@ def T_sky_fnct(x, y, z, freq):
     T_sky, sky temperature in the direction of the puslar (Kelvin)
     """
     l, b, d = gal_cart.cart2gal(x, y, z, degree=True) # galactic coordinates of the puslar, Units: l (rad), b (rad), d (kpc)
+
+    # change galactic coordinates to colatitude coordinates
+    # HEALPix maps use theta = colatitude (0 at North pole), phi = longitude
+    theta = np.radians(90.0 - b)  # Convert latitude to colatitude
+    phi = np.radians(l)           # Longitude stays the same
+
     # Sky temperature at 408 MHz
-    s = skytemp.SkyTemp(l, b, r"./skytempy/haslam408_ds_Remazeilles2014.fits") # get the skytemp information from the fits file
+    s = skytemp.SkyTemp(theta, phi, r"./skytempy/haslam408_ds_Remazeilles2014.fits") # get the skytemp information from the fits file
     T_sky = s.get_temp(freq) # get the temperature from the output, freq units in MHz
     return T_sky
 
@@ -266,9 +273,9 @@ def S_min(M, P_orb, e, a, P, P_dot, B, x, y, z, vx, vy, vz, L, T_rec, d_f, n_cha
     DM_0 = DM0_fnct(freq, d_f, n_chan, tau_samp) # diagonal dispersion measure of the survey
     #print("DM_0", DM_0)
 
-    #T_sky = T_sky_fnct(-x, -y, z, freq) # get the sky temperature in the direction of the pulsar (Kelvin)
+    T_sky = T_sky_fnct(-x, -y, z, freq) # get the sky temperature in the direction of the pulsar (Kelvin)
     #print("T_sky", T_sky)
-    T_sky=0 # set a temporary value for T_sky to see if there are other issues.
+    #T_sky=0 # set a temporary value for T_sky to see if there are other issues.
 
     F, D, Area = flux(L, x, y, z) # get the flux of the pulsar, Units: F (mJy), D (Kpc), Area (Kpc^2)
     #print("F", F)
