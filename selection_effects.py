@@ -99,13 +99,8 @@ def T_sky_fnct(x, y, z, freq):
     """
     l, b, d = gal_cart.cart2gal(x, y, z, degree=True) # galactic coordinates of the puslar, Units: l (rad), b (rad), d (kpc)
 
-    # change galactic coordinates to colatitude coordinates
-    # HEALPix maps use theta = colatitude (0 at North pole), phi = longitude
-    theta = np.radians(90.0 - b)  # Convert latitude to colatitude
-    phi = np.radians(l)           # Longitude stays the same
-
     # Sky temperature at 408 MHz
-    s = skytemp.SkyTemp(theta, phi, r"./skytempy/haslam408_ds_Remazeilles2014.fits") # get the skytemp information from the fits file
+    s = skytemp.SkyTemp(l, b, r"./skytempy/haslam408_ds_Remazeilles2014.fits") # get the skytemp information from the fits file
     T_sky = s.get_temp(freq) # get the temperature from the output, freq units in MHz
     return T_sky
 
