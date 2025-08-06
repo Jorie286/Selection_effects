@@ -13,7 +13,7 @@ import survey
 from skytempy import skytemp
 
 # astrophysical constants
-R0_Kpc=8.5 # Kpc, distance Sun-Galaxy Center
+R0_Kpc=8.3 # Kpc, distance Sun-Galaxy Center
 
 def DM_fnct(x, y, z, freq):
     """
