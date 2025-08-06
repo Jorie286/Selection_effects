@@ -268,9 +268,9 @@ def S_min(M, P_orb, e, a, P, P_dot, B, x, y, z, vx, vy, vz, L, T_rec, d_f, n_cha
     DM_0 = DM0_fnct(freq, d_f, n_chan, tau_samp) # diagonal dispersion measure of the survey
     #print("DM_0", DM_0)
 
-    #T_sky = T_sky_fnct(-x, -y, z, freq) # get the sky temperature in the direction of the pulsar (Kelvin)
+    T_sky = T_sky_fnct(-x, -y, z, freq) # get the sky temperature in the direction of the pulsar (Kelvin)
     #print("T_sky", T_sky)
-    T_sky=0 # set a temporary value for T_sky to see if there are other issues.
+    #T_sky=0 # set a temporary value for T_sky to see if there are other issues.
 
     F, D, Area = flux(L, x, y, z) # get the flux of the pulsar, Units: F (mJy), D (Kpc), Area (Kpc^2)
     #print("F", F)
