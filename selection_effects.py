@@ -97,7 +97,7 @@ def T_sky_fnct(x, y, z, freq):
     --------
     T_sky, sky temperature in the direction of the puslar (Kelvin)
     """
-    l, b, d = gal_cart.cart2gal(-x+R0_Kpc, y, z, degree=True) # galactic coordinates of the puslar, Units: l (rad), b (rad), d (kpc)
+    l, b, d = gal_cart.cart2gal(-x-R0_Kpc, y, z, degree=True) # galactic coordinates of the puslar, Units: l (rad), b (rad), d (kpc)
 
     # Sky temperature at 408 MHz
     s = skytemp.SkyTemp(l, b, r"./skytempy/haslam408_ds_Remazeilles2014.fits") # get the skytemp information from the fits file
