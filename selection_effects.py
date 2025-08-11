@@ -77,7 +77,6 @@ def DM0_fnct(freq, d_f, n_chan, tau_samp):
     DM_0, diagonal dispersion measure (pc cm^-3)
     """
     wavelength=const.c/(freq * 1e6) # Units: m
-    # printf("wavelength=%3.3f\n", % wavelength)
 
     DM_0 = 1000.0 * tau_samp *((3e2/wavelength)**3)/(8.3e6*(d_f/n_chan))
     # The following is dm0 copied from survey.c:
@@ -256,25 +255,22 @@ def S_min(M, P_orb, e, a, P, P_dot, B, x, y, z, vx, vy, vz, L, T_rec, d_f, n_cha
         D, distance (Kpc)
         SNR_05, SNR_27, SNR_fwhm; the signal to noise ratio of the pulsar data for three different functions of W_i
         T_sky, sky temperature (Kelvin)
+        DM, dispersion measure (pc cm^-3)
+        DM_0, diagonal dispersion measure (pc cm^-3)
+        We_05, We_27, We_fwhm; effective pulse width for different intrinsic pulse widths (seconds)
     """
 
     DM, tau_sc = DM_fnct(x, y, z, freq) # dispersion measure in the direction of the pulsar, Units: pc/cm^3, seconds
-    #print("freq", freq)
-    #print("DM", DM)
 
     tau_scatt = tau_scatt_fnct(DM, freq) # ISM scattering time, Units: seconds
-    #print("tau_scatt", tau_scatt)
 
     DM_0 = DM0_fnct(freq, d_f, n_chan, tau_samp) # diagonal dispersion measure of the survey
-    #print("DM_0", DM_0)
 
     T_sky = T_sky_fnct(-x, -y, z, freq) # get the sky temperature in the direction of the pulsar (Kelvin)
     #print("T_sky", T_sky)
     #T_sky=0 # set a temporary value for T_sky to see if there are other issues.
 
     F, D, Area = flux(L, x, y, z) # get the flux of the pulsar, Units: F (mJy), D (Kpc), Area (Kpc^2)
-    #print("F", F)
-    #print("Area", Area)
 
     # the three equations for W_i come from:
         # fixed duty cycle in DNS paper, list index 0
@@ -284,10 +280,12 @@ def S_min(M, P_orb, e, a, P, P_dot, B, x, y, z, vx, vy, vz, L, T_rec, d_f, n_cha
     Wi_list = [P*0.05, (P**0.27)*0.05, FWHM*P]
     S_min_list = []
     SNR_list = []
+    We_list = []
 
     for W_i in Wi_list:
         # compute the effective pulse width
         We = np.sqrt(W_i**2 + tau_samp**2 + (tau_samp*(DM/DM_0))**2 + tau_scatt**2) # Units: seconds
+        We_list.append(We)
 
         if We>=P:
             S_min = 9.99e9
@@ -311,7 +309,9 @@ def S_min(M, P_orb, e, a, P, P_dot, B, x, y, z, vx, vy, vz, L, T_rec, d_f, n_cha
     # get each SNR from the list
     SNR_05, SNR_27, SNR_fwhm = SNR_list
 
-    return S_min_05, S_min_27, S_min_fwhm, F, Area, SNR_05, SNR_27, SNR_fwhm, T_sky
+    We_05, We_27, We_fwhm = We_list
+
+    return S_min_05, S_min_27, S_min_fwhm, F, Area, SNR_05, SNR_27, SNR_fwhm, T_sky, DM, DM_0, We_05, We_27, We_fwhm
 
 def f_beaming(P):
     """

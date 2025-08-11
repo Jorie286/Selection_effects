@@ -75,6 +75,11 @@ pulsar_data_out["SNR1_27"] = None
 pulsar_data_out["SNR2_27"] = None
 pulsar_data_out["SNR1_fwhm"] = None
 pulsar_data_out["SNR2_fwhm"] = None
+pulsar_data_out["DM"] = None
+pulsar_data_out["DM_0"] = None
+pulsar_data_out["We_05"] = None
+pulsar_data_out["We_27"] = None
+pulsar_data_out["We_fwhm"] = None
 #pulsar_data_out["gamma_1m_sq"] = None
 #pulsar_data_out["gamma_2m_sq"] = None
 #pulsar_data_out["gamma_3m_sq"] = None
@@ -99,19 +104,16 @@ for i, row in p.iterrows():
 
         # check to see if each object is a neutron star, if it is not, save values as None, else compute the values
         if pd.isna(P_1) == True:
-            S_min1_05, S_min1_27, S_min1_fwhm, flux1, area, f_b1, SNR1_05, SNR1_27, SNR1_fwhm, T_sky = None, None, None, None, None, None, None, None, None
+            S_min1_05, S_min1_27, S_min1_fwhm, flux1, area, f_b1, SNR1_05, SNR1_27, SNR1_fwhm, T_sky, DM, DM_0, We_05, We_27, We_fwhm = None, None, None, None, None, None, None, None, None, None, None, None, None, None, None
         else:
-            S_min1_05, S_min1_27, S_min1_fwhm, flux1, area, SNR1_05, SNR1_27, SNR1_fwhm, T_sky = selection_effects.S_min(M_1, P_orb, e, a, P_1, P_dot1, B_1, x, y, z, vx, vy, vz, L1, T_rec, d_f, n_chan, freq, tau_samp, G, t_int)
-            #print("Area", area)
-            #print("S_min1*area", S_min1*area)
+            S_min1_05, S_min1_27, S_min1_fwhm, flux1, area, SNR1_05, SNR1_27, SNR1_fwhm, T_sky, DM, DM_0, We_05, We_27, We_fwhm = selection_effects.S_min(M_1, P_orb, e, a, P_1, P_dot1, B_1, x, y, z, vx, vy, vz, L1, T_rec, d_f, n_chan, freq, tau_samp, G, t_int)
 
             f_b1 = selection_effects.f_beaming(P_1)
 
         if pd.isna(P_2) == True:
-            S_min2_05, S_min2_27, S_min2_fwhm, flux2, area, f_b2, SNR2_05, SNR2_27, SNR2_fwhm, T_sky= None, None, None, None, None, None, None, None, None, None
+            S_min2_05, S_min2_27, S_min2_fwhm, flux2, area, f_b2, SNR2_05, SNR2_27, SNR2_fwhm, T_sky, DM, DM_0, We_05, We_27, We_fwhm = None, None, None, None, None, None, None, None, None, None, None, None, None, None, None
         else:
-            S_min2_05, S_min2_27, S_min2_fwhm, flux2, area, SNR2_05, SNR2_27, SNR2_fwhm, T_sky = selection_effects.S_min(M_2, P_orb, e, a, P_2, P_dot2, B_2, x, y, z, vx, vy, vz, L2, T_rec, d_f, n_chan, freq, tau_samp, G, t_int)
-            #print("S_min_2*area", S_min2*area)
+            S_min2_05, S_min2_27, S_min2_fwhm, flux2, area, SNR2_05, SNR2_27, SNR2_fwhm, T_sky, DM, DM_0, We_05, We_27, We_fwhm = selection_effects.S_min(M_2, P_orb, e, a, P_2, P_dot2, B_2, x, y, z, vx, vy, vz, L2, T_rec, d_f, n_chan, freq, tau_samp, G, t_int)
 
             f_b2 = selection_effects.f_beaming(P_2)
 
@@ -124,9 +126,9 @@ for i, row in p.iterrows():
 
         # check to see if each object is a neutron star, if it is not, save values as None, else compute the values
         if pd.isna(P_1) == True:
-            S_min1_05, S_min1_27, S_min1_fwhm, flux1, area, f_b1, SNR1_05, SNR1_27, SNR1_fwhm, T_sky = None, None, None, None, None, None, None, None, None
+            S_min1_05, S_min1_27, S_min1_fwhm, flux1, area, f_b1, SNR1_05, SNR1_27, SNR1_fwhm, T_sky, DM, DM_0, We_05, We_27, We_fwhm = None, None, None, None, None, None, None, None, None, None, None, None, None, None, None
         else:
-            S_min1_05, S_min1_27, S_min1_fwhm, flux1, area, SNR1_05, SNR1_27, SNR1_fwhm, T_sky = selection_effects.S_min(M_1, P_orb, e, a, P_1, P_dot1, B_1, x, y, z, vx, vy, vz, L1, T_rec, d_f, n_chan, freq, tau_samp, G, t_int)
+            S_min1_05, S_min1_27, S_min1_fwhm, flux1, area, SNR1_05, SNR1_27, SNR1_fwhm, T_sky, DM, DM_0, We_05, We_27, We_fwhm = selection_effects.S_min(M_1, P_orb, e, a, P_1, P_dot1, B_1, x, y, z, vx, vy, vz, L1, T_rec, d_f, n_chan, freq, tau_samp, G, t_int)
 
             f_b1 = selection_effects.f_beaming(P_1)
 
@@ -158,6 +160,11 @@ for i, row in p.iterrows():
         pulsar_data_out.loc[i, "SNR2_27"] = SNR2_27
         pulsar_data_out.loc[i, "SNR1_fwhm"] = SNR1_fwhm
         pulsar_data_out.loc[i, "SNR2_fwhm"] = SNR2_fwhm
+        pulsar_data_out.loc[i, "DM"] = DM
+        pulsar_data_out.loc[i, "DM_0"] = DM_0
+        pulsar_data_out.loc[i, "We_05"] = We_05
+        pulsar_data_out.loc[i, "We_27"] = We_27
+        pulsar_data_out.loc[i, "We_fwhm"] = We_fwhm
         #pulsar_data_out.loc[i, "gamma_1m_sq"] = gamma_1m_sq
         #pulsar_data_out.loc[i, "gamma_2m_sq"] = gamma_2m_sq
         #pulsar_data_out.loc[i, "gamma_3m_sq"] = gamma_3m_sq
