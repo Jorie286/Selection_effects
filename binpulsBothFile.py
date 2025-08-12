@@ -84,16 +84,6 @@ pulsar_data_out["We_fwhm"] = None
 #pulsar_data_out["gamma_2m_sq"] = None
 #pulsar_data_out["gamma_3m_sq"] = None
 
-# create empty rows for T_sky output
-T_sky_test["S_min1_05*area"] = None
-T_sky_test["S_min2_05*area"] = None
-T_sky_test["S_min1_27*area"] = None
-T_sky_test["S_min2_27*area"] = None
-T_sky_test["S_min1_fwhm*area"] = None
-T_sky_test["S_min2_fwhm*area"] = None
-T_sky_test["Area"] = None
-T_sky_test["T_sky"] = None
-
 # iterate through each row of the simulated pulsar data and determine if the pulsar is detectable
 for i, row in p.iterrows():
     if file_type == "binary":
@@ -169,15 +159,5 @@ for i, row in p.iterrows():
         #pulsar_data_out.loc[i, "gamma_2m_sq"] = gamma_2m_sq
         #pulsar_data_out.loc[i, "gamma_3m_sq"] = gamma_3m_sq
 
-        T_sky_test.loc[i, "S_min1_05*area"] = S_min1_05*area
-        T_sky_test.loc[i, "S_min2_05*area"] = S_min2_05*area
-        T_sky_test.loc[i, "S_min1_27*area"] = S_min1_27*area
-        T_sky_test.loc[i, "S_min2_27*area"] = S_min2_27*area
-        T_sky_test.loc[i, "S_min1_fwhm*area"] = S_min1_fwhm*area
-        T_sky_test.loc[i, "S_min2_fwhm*area"] = S_min2_fwhm*area
-        T_sky_test.loc[i, "Area"] = area
-        T_sky_test.loc[i, "T_sky"] = T_sky
-
 # save the updated pulsar data to two new csv files
 pulsar_data_out.to_csv(str(output_name), index=False, sep=";")
-T_sky_test.to_csv("T_sky_test.dat", index=False, sep=";")
