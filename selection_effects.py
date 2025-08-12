@@ -30,7 +30,7 @@ def DM_fnct(x, y, z, freq):
     tau_sc, scattering timescale at 1 MHz, units: seconds (from pygedm dist_to_dm docs)
     """
 
-    l, b, d = gal_cart.cart2gal(x, y, z, degree=True) # Units: l (degrees), b (degrees), d (kpc)
+    l, b, d = gal_cart.cart2gal(-x, y, z, degree=True) # Units: l (degrees), b (degrees), d (kpc)
 
     # d needs to be in pc for the pygedm function
     DM, tau_sc = pygedm.dist_to_dm(l, b, dist = d*1e3, nu=(freq/1e3)) # Units: DM (pc / cm^3), tau_sc (GHz)
