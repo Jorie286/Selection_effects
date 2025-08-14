@@ -1,5 +1,3 @@
-# equivalent file of gal_cart.h and gal_cart.c
-
 # import necessary packages and files
 import galpy
 import galpy.util.coords

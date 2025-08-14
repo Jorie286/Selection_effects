@@ -1,10 +1,9 @@
-# equivalent file of survey.h and survey.c
-
 import numpy as np
 import math
 import gal_cart
 
-# Geometry checking functions  - for each survey
+# Geometry checking functions for each survey
+
 def ic_parkes_70(l, b):
     """
     Parkes 70 cm geometry check.

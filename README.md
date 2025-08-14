@@ -2,11 +2,22 @@
 
 Determine which simulated pulsars would be detected in a survey by calculating the selection effects of the survey on the pulsar data.
 
-To determine which pulsars would be detected, the binpulsBothFile.py should be run. It asks for inputs of what survey you want to use, a file containing the luminosities associated with the pulsar data, and the file in which the simulated pulsar data is stored. The script will return a pulsar_data_updated.csv file when it finishes running. This file will include new columns with it's flux, beaming fraction, flux lower limit for the given survey, and signal to noise ratio.
+To determine which pulsars would be detected, the binpulsBothFile.py should be run. It asks for inputs of what survey you want to use, a file containing the luminosities associated with the pulsar data, and the file in which the simulated pulsar data is stored. The input should be entered as follows:
+
+$\verb|python binpulsBothFile.py survey_name input.dat system_type output.dat|$
+
+Replace the survey_name with one listed in the avaliable surveys below. The input.dat file and output.dat file should be changed to the dat files that you want to use as the input and the one you want the output written to. The system_type should be changed to binary if you are using an input file that contains data from binary pulsar systems. Otherwise, it will assume you are using a single star system.
+
+The script will return the output file when it finishes running. This file will include the following new columns for each star or each star in the binary system:
+- minimum observable luminosity (S_min1, S_min2)
+- area (Area)
+- sky temperature (T_sky)
+- binary varible determining if the star was detected (without considering the beaming fraction) (det1, det2)
+- beaming fraction (f_beaming1, f_beaming2)
+- signal to noise ratio (SNR1, SNR2)
 
 The units used within the code are:
-- Angle: radians
-- Dispersion Measure: m^-3 (???)
+- Dispersion Measure: pc cm^-3 (???)
 - Distance: Kpc
 - Frequency: MHz
 - Flux: mJy
