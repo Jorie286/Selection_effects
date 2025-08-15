@@ -97,6 +97,56 @@ def T_sky_fnct(x, y, z, freq):
     T_sky = s.get_temp(freq) # get the temperature from the output, freq units in MHz
     return T_sky
 
+def DNS_NSBH_sel_eff(P1, P2, P_orb1, P_orb2, e, sys_type):
+    """
+    Get the radio detectability cutoff for (Double Neutron Star) DNS and (Neutron Star Black Hole) NSBH systems using the parameters described in Chattopadhyay, D., Stevenson, S., Hurley, J. R., Rossi, L. J., & Flynn, C. 2020, Monthly Notices of the Royal Astronomical Society, 494, 1587, doi: 10.1093/mnras/staa756
+
+    Input:
+        P1, spin period of primary object (seconds)
+        P2, spin period of secondary object (seconds)
+        P_orb1, orbital period of primary object (days)
+        P_orb2, orbital period of secondary object (days)
+        e, eccentricity of the binary systems
+        sys_type, the type of system being calculated
+
+    Returns:
+        alt_det1, binary variable indicating if the primary object is radio detectable
+        alt_det2, binary varible indictating if the secondary object is radio detectable
+    """
+
+    if sys_type==NSBH:
+        # constants from linear regression fitting with black hole mass of 10 M_sun and neutron stars of mass 1.4 M_sun, 1000 s observations and 60 degree orbital inclination
+        m_m = -26.42
+        c_m= -18.31
+        m_c= -2.53
+        c_c= 4.51
+
+        m = (m_m * e) + c_m
+        c = (m_c * e) + c_c
+
+        alt_det1 = (P_orb >= (m * P1) + c).astype(int)
+        alt_det2 = (P_orb >= (m * P2) + c).astype(int)
+
+
+    elif sys_type==DNS:
+        # constants from linear regression fitting with both neutron stars of mass 1.4 M_sun, 1000 s observations and 60 degree orbital inclination
+        m_m = -8.90
+        c_m= -27.68
+        m_c= -3.40
+        c_c= 5.72
+
+        m = (m_m * e) + c_m
+        c = (m_c * e) + c_c
+
+        alt_det1 = (P_orb >= (m * P1) + c).astype(int)
+        alt_det2 = (P_orb >= (m * P2) + c).astype(int)
+
+    else:
+        alt_det1=None
+        alt_det2=None
+
+    return alt_det1, alt_det2
+
 def flux(L, x, y, z):
     """
     Compute the flux of the pulsar.
@@ -125,7 +175,7 @@ def S_min(M, P_orb, e, a, P, P_dot, B, x, y, z, vx, vy, vz, L, T_rec, d_f, n_cha
         P_orb, orbital period (days)
         e, eccentricity
         a, separation between the two objects (AU)
-        P, rotational period (seconds)
+        P, spin period (seconds)
         P_dot, change in rotational period (seconds)
         B, surface magnetic field (Tesla)
         x, y, z; cartesian coordinates (Kpc)
@@ -171,12 +221,10 @@ def S_min(M, P_orb, e, a, P, P_dot, B, x, y, z, vx, vy, vz, L, T_rec, d_f, n_cha
     Wi_list = [P*0.05, (P**0.27)*0.05, FWHM*P]
     S_min_list = []
     SNR_list = []
-    We_list = []
 
     for W_i in Wi_list:
         # compute the effective pulse width
         We = np.sqrt(W_i**2 + tau_samp**2 + (tau_samp*(DM/DM_0))**2 + tau_scatt**2) # Units: seconds
-        We_list.append(We)
 
         if We>=P:
             S_min = 9.99e9
@@ -200,9 +248,7 @@ def S_min(M, P_orb, e, a, P, P_dot, B, x, y, z, vx, vy, vz, L, T_rec, d_f, n_cha
     # get each SNR from the list
     SNR_05, SNR_27, SNR_fwhm = SNR_list
 
-    We_05, We_27, We_fwhm = We_list
-
-    return S_min_05, S_min_27, S_min_fwhm, F, Area, SNR_05, SNR_27, SNR_fwhm, T_sky, DM, DM_0, We_05, We_27, We_fwhm
+    return S_min_05, S_min_27, S_min_fwhm, F, Area, SNR_05, SNR_27, SNR_fwhm, T_sky
 
 def f_beaming(P):
     """

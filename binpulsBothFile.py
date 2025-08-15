@@ -11,8 +11,8 @@ import survey
 import selection_effects
 
 # take care of the error handling for the user inputs to make sure all are valid before we start computation
-if len(sys.argv)!= 5:
-    print("Error: not enough inputs given! Please try again. Expected 4 but got", len(sys.argv))
+if len(sys.argv)!= 6:
+    print("Error: not enough inputs given! Please try again. Expected 5 but got", len(sys.argv))
     print("Please pass, survey_name input_data file_type output_name")
     sys.exit(-1)
 
@@ -20,7 +20,8 @@ if len(sys.argv)!= 5:
 survey_name = sys.argv[1]
 pulsar_data = sys.argv[2]
 file_type = sys.argv[3]
-output_name = sys.argv[4]
+line_cutoff = sys.argv[4]
+output_name = sys.argv[5]
 
 # do error checking on the inputs and get them corrected if necessary
 if str(survey_name) not in survey.surv_array[:, 0]:
@@ -46,6 +47,20 @@ print("All inputs successfully processed!")
 # duplicate the orignal dataframe so we don't modify the orignal
 pulsar_data_out = p.copy()
 
+# check to see if user wants to remove all data below death lines
+if line_cutoff == "True": # if true remove points below death lines from the copied dataframe
+    death1 = pulsar_data_out.loc[(10**(3.29 * np.log10(pulsar_data_out["p1(s)"]) - 16.55)) > pulsar_data_out["pdot1(s/s)"] or (10**(0.92 * np.log10(pulsar_data_out["p1(s)"]) - 18.65)) > pulsar_data_out["pdot1(s/s)"], "pdot1(s/s)"]
+
+    death2 = pulsar_data_out.loc[(10**(3.29 * np.log10(pulsar_data_out["p2(s)"]) - 16.55)) > pulsar_data_out["pdot2(s/s)"] or (10**(0.92 * np.log10(pulsar_data_out["p2(s)"]) - 18.65)) > pulsar_data_out["pdot2(s/s)"], "pdot2(s/s)"]
+
+    # remove spin period data that is below the death lines so that it is not included in the calculation and will not be plotted.
+    pulsar_data_out.loc[death1, "p1(s)"] = None
+    pulsar_data_out.loc[death2, "p2(s)"] = None
+
+else: # if we do not want data below the death line removed, continue with the calculation
+    continue
+
+
 # create empty rows to store new data in
 pulsar_data_out["S_min1_05*area"] = None
 pulsar_data_out["S_min2_05*area"] = None
@@ -69,6 +84,8 @@ pulsar_data_out["SNR1_27"] = None
 pulsar_data_out["SNR2_27"] = None
 pulsar_data_out["SNR1_fwhm"] = None
 pulsar_data_out["SNR2_fwhm"] = None
+pulsar_data_out["alt_det1"] = None
+pulsar_data_out["alt_det2"] = None
 
 # iterate through each row of the simulated pulsar data and determine if the pulsar is detectable
 for i, row in pulsar_data_out.iterrows():
@@ -94,6 +111,8 @@ for i, row in pulsar_data_out.iterrows():
 
             f_b2 = selection_effects.f_beaming(P_2)
 
+        #alt_det1, alt_det2 = selection_effects.DNS_NSBH_sel_eff(P1, P2, P_orb1, P_orb2, e, sys_type)
+
     else:
         # define each constant in the pulsar data as what it is for greater readability
         # Units: none, M_sun, none, s, s^2, T, Kpc, Kpc, Kpc, km/s, km/s, km/s, mJy Kpc^2
@@ -108,7 +127,8 @@ for i, row in pulsar_data_out.iterrows():
             f_b1 = selection_effects.f_beaming(P_1)
 
         # set all other variables that would be returned for a binary to none for a single star system
-        S_min2_05, S_min2_27, S_min2_fwhm, flux2, L2, gamma_1m_sq, gamma_2m_sq, gamma_3m_sq, f_b2, SNR2_05, SNR2_27, SNR2_fwhm = None, None, None, None, None, None, None, None, None, None, None, None
+        S_min2_05, S_min2_27, S_min2_fwhm, flux2, L2, gamma_1m_sq, gamma_2m_sq, gamma_3m_sq, f_b2, SNR2_05, SNR2_27, SNR2_fwhm, alt_det1, alt_det2 = None, None, None, None, None, None, None, None, None, None, None, None, None, None
+
 
     # get the galacitc coordinates of the object
     l, b, d = gal_cart.cart2gal(x, y, z, degree=True)
@@ -135,6 +155,8 @@ for i, row in pulsar_data_out.iterrows():
         pulsar_data_out.loc[i, "SNR2_27"] = SNR2_27
         pulsar_data_out.loc[i, "SNR1_fwhm"] = SNR1_fwhm
         pulsar_data_out.loc[i, "SNR2_fwhm"] = SNR2_fwhm
+        pulsar_data_out.loc[i, "alt_det1"] = alt_det1
+        pulsar_data_out.loc[i, "alt_det2"] = alt_det2
 
 # save the updated pulsar data to two new csv files
 pulsar_data_out.to_csv(str(output_name), index=False, sep=";")
