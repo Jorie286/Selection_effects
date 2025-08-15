@@ -57,9 +57,6 @@ if line_cutoff == "True": # if true remove points below death lines from the cop
     pulsar_data_out.loc[death1, "p1(s)"] = None
     pulsar_data_out.loc[death2, "p2(s)"] = None
 
-else: # if we do not want data below the death line removed, continue with the calculation
-    continue
-
 
 # create empty rows to store new data in
 pulsar_data_out["S_min1_05*area"] = None
