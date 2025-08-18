@@ -101,7 +101,7 @@ for i, row in pulsar_data_out.iterrows():
         det1 = selection_effects.death_lines(P_1, P_dot1, x, y, z, L1)
 
         # check to see if each object is a neutron star, if it is not, save values as None, else compute the values
-        if pd.isna(P_1) == True if det1==0:
+        if pd.isna(P_1) == True or det1==0:
             S_min1, flux1, area, f_b1, SNR1, T_sky = None, None, None, None, None, None
         else:
             S_min1, flux1, area, SNR1, T_sky = selection_effects.S_min(M_1, P_orb, e, a, P_1, P_dot1, B_1, x, y, z, vx, vy, vz, L1, T_rec, d_f, n_chan, freq, tau_samp, G, t_int)
