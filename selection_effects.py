@@ -97,55 +97,103 @@ def T_sky_fnct(x, y, z, freq):
     T_sky = s.get_temp(freq) # get the temperature from the output, freq units in MHz
     return T_sky
 
-def DNS_NSBH_sel_eff(P1, P2, P_orb1, P_orb2, e, sys_type):
+def DNS_NSBH_sel_eff(P1, P2, P_orb1, P_orb2, e, type1, type2):
     """
     Get the radio detectability cutoff for (Double Neutron Star) DNS and (Neutron Star Black Hole) NSBH systems using the parameters described in Chattopadhyay, D., Stevenson, S., Hurley, J. R., Rossi, L. J., & Flynn, C. 2020, Monthly Notices of the Royal Astronomical Society, 494, 1587, doi: 10.1093/mnras/staa756
 
     Input:
-        P1, spin period of primary object (seconds)
-        P2, spin period of secondary object (seconds)
-        P_orb1, orbital period of primary object (days)
-        P_orb2, orbital period of secondary object (days)
-        e, eccentricity of the binary systems
-        sys_type, the type of system being calculated
+    ------
+    P1, spin period of primary object (seconds)
+    P2, spin period of secondary object (seconds)
+    P_orb1, orbital period of primary object (days)
+    P_orb2, orbital period of secondary object (days)
+    e, eccentricity of the binary systems
+    type1, the type of the first object
+    type2, the type of the second object
 
     Returns:
-        alt_det1, binary variable indicating if the primary object is radio detectable
-        alt_det2, binary varible indictating if the secondary object is radio detectable
+    --------
+    alt_det1, binary variable indicating if the primary object is radio detectable
+    alt_det2, binary varible indictating if the secondary object is radio detectable
     """
 
-    if sys_type==NSBH:
-        # constants from linear regression fitting with black hole mass of 10 M_sun and neutron stars of mass 1.4 M_sun, 1000 s observations and 60 degree orbital inclination
-        m_m = -26.42
-        c_m= -18.31
-        m_c= -2.53
-        c_c= 4.51
+    # check to see that neither object in the system is white dwarf; if not, compute radio detectability, else return None for both values
+    if type1 != 10 or type1 != 11 or type1 != 12 or type2 != 10 or type2 != 11 or type2 != 12 or type1.lower().find("wd") == -1 or type2.lower().find("wd") == -1:
 
-        m = (m_m * e) + c_m
-        c = (m_c * e) + c_c
+        # check for a double neutron star system
+        if (type1 == 13 and type2 == 13) or (type1.lower().find("ns") != -1 and type2.lower().find("ns") != -1):
 
-        alt_det1 = (P_orb >= (m * P1) + c).astype(int)
-        alt_det2 = (P_orb >= (m * P2) + c).astype(int)
+            # constants from linear regression fitting with both neutron stars of mass 1.4 M_sun, 1000 s observations and 60 degree orbital inclination
+            m_m = -8.90
+            c_m= -27.68
+            m_c= -3.40
+            c_c= 5.72
+
+            m = (m_m * e) + c_m
+            c = (m_c * e) + c_c
+
+            alt_det1 = (P_orb >= (m * P1) + c).astype(int)
+            alt_det2 = (P_orb >= (m * P2) + c).astype(int)
 
 
-    elif sys_type==DNS:
-        # constants from linear regression fitting with both neutron stars of mass 1.4 M_sun, 1000 s observations and 60 degree orbital inclination
-        m_m = -8.90
-        c_m= -27.68
-        m_c= -3.40
-        c_c= 5.72
+        else: # the only other system possible is a neutron star black hole system, compute if not a white dwarf neutron star system or a double neutron star system
 
-        m = (m_m * e) + c_m
-        c = (m_c * e) + c_c
+            # constants from linear regression fitting with black hole mass of 10 M_sun and neutron stars of mass 1.4 M_sun, 1000 s observations and 60 degree orbital inclination
+            m_m = -26.42
+            c_m= -18.31
+            m_c= -2.53
+            c_c= 4.51
 
-        alt_det1 = (P_orb >= (m * P1) + c).astype(int)
-        alt_det2 = (P_orb >= (m * P2) + c).astype(int)
+            m = (m_m * e) + c_m
+            c = (m_c * e) + c_c
 
-    else:
+            alt_det1 = (P_orb >= (m * P1) + c).astype(int)
+            alt_det2 = (P_orb >= (m * P2) + c).astype(int)
+
+    else: # if the system does contain a white dwarf, don't get the radio detectability
         alt_det1=None
         alt_det2=None
 
     return alt_det1, alt_det2
+
+def death_lines(P, P_dot, freq, area, L):
+    """
+    Determine if the pulsar falls within or outside of the death lines.
+
+    Input:
+    ------
+    P, spin period (s)
+    P_dot, change in the spin period (s/s)
+    freq, observing frequency (MHz)
+    area, reciever area (m^2) ????
+    L, radio luminosity (mJy)
+
+    Returns:
+    --------
+    P, original spin period if above death lines or None if below death lines
+    """
+
+    # determine if the
+    death_line = (10**(0.92 * np.log10(P) - 18.65)) >= P_dot
+
+    # DEBATRI: What is the moment of interia (I) here?
+    I = 1e38 # kg m^2 (from Lorimer, D., et. al., Handbook of Pulsar Astronomy)
+    E_dot = 4 * (np.pi**2) * I * P_dot * (P**(-3)) # Watts
+    E_dot = 1e26 * (E_dot/(area * (1e6*freq))) # convert E_dot to Jy
+    E_dot = E_dot*1e3 # convert E_dot to mJy to match with L
+
+
+    # get the radio efficiency of the pulsars
+    xi = L/E_dot
+
+    xi_max = 0.01
+
+    # check the death line and radio efficieny of the pulsar, if it has stopped emitting, set P_1 to None
+    if death_line == True or xi >= xi_max:
+        P = None
+
+    # Return the changed (or unchanged) value of P so we know what pulsar are below the death lines, don't calculate selection effects for these
+    return P
 
 def flux(L, x, y, z):
     """

@@ -4,9 +4,13 @@ Determine which simulated pulsars would be detected in a survey by calculating t
 
 To determine which pulsars would be detected, the binpulsBothFile.py should be run. It asks for inputs of what survey you want to use, a file containing the luminosities associated with the pulsar data, and the file in which the simulated pulsar data is stored. The input should be entered as follows:
 
-$\verb|python binpulsBothFile.py survey_name input.dat system_type line_cutoff output.dat|$
+$\verb|python binpulsBothFile.py survey_name input.dat system_type output.dat|$
 
-Replace the survey_name with one listed in the avaliable surveys below. The input.dat file and output.dat file should be changed to the dat files that you want to use as the input and the one you want the output written to. The system_type should be changed to binary if you are using an input file that contains data from binary pulsar systems. Otherwise, it will assume you are using a single star system. The line_cutoff should be given as a boolean. True if the data below the pular deathlines should be removed from the calculation, False if there is a soft deathline cutoff.
+Replace the survey_name with one listed in the avaliable surveys below. The input.dat file and output.dat file should be changed to the dat files that you want to use as the input and the one you want the output written to. The system_type should be changed to binary if you are using an input file that contains data from binary pulsar systems. Otherwise, it will assume you are using a single star system.
+
+The code automatically impliments a soft cutoff of pulsar death lines.. . . (add more info)
+
+The pipeline impliments Bagchi correction (Bagchi, M., Lorimer, D. R., & Wolfe, S. 2013, Monthly Notices of the Royal Astronomical Society, 432, 1303–1314, doi: 10.1093/mnras/stt559) based on the objects in the system. . .. . (add more info)
 
 The script will return the output file when it finishes running. This file will include the following new columns for each star or each star in the binary system:
 - minimum observable luminosity (S_min1, S_min2)

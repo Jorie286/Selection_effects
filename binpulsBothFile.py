@@ -11,7 +11,7 @@ import survey
 import selection_effects
 
 # take care of the error handling for the user inputs to make sure all are valid before we start computation
-if len(sys.argv)!= 6:
+if len(sys.argv)!= 5:
     print("Error: not enough inputs given! Please try again. Expected 5 but got", len(sys.argv))
     print("Please pass, survey_name input_data file_type output_name")
     sys.exit(-1)
@@ -20,8 +20,7 @@ if len(sys.argv)!= 6:
 survey_name = sys.argv[1]
 pulsar_data = sys.argv[2]
 file_type = sys.argv[3]
-line_cutoff = sys.argv[4]
-output_name = sys.argv[5]
+output_name = sys.argv[4]
 
 # do error checking on the inputs and get them corrected if necessary
 if str(survey_name) not in survey.surv_array[:, 0]:
@@ -46,17 +45,6 @@ print("All inputs successfully processed!")
 
 # duplicate the orignal dataframe so we don't modify the orignal
 pulsar_data_out = p.copy()
-
-# check to see if user wants to remove all data below death lines
-if line_cutoff == "True": # if true remove points below death lines from the copied dataframe
-    death1 = pulsar_data_out.loc[(10**(3.29 * np.log10(pulsar_data_out["p1(s)"]) - 16.55)) > pulsar_data_out["pdot1(s/s)"] or (10**(0.92 * np.log10(pulsar_data_out["p1(s)"]) - 18.65)) > pulsar_data_out["pdot1(s/s)"], "pdot1(s/s)"]
-
-    death2 = pulsar_data_out.loc[(10**(3.29 * np.log10(pulsar_data_out["p2(s)"]) - 16.55)) > pulsar_data_out["pdot2(s/s)"] or (10**(0.92 * np.log10(pulsar_data_out["p2(s)"]) - 18.65)) > pulsar_data_out["pdot2(s/s)"], "pdot2(s/s)"]
-
-    # remove spin period data that is below the death lines so that it is not included in the calculation and will not be plotted.
-    pulsar_data_out.loc[death1, "p1(s)"] = None
-    pulsar_data_out.loc[death2, "p2(s)"] = None
-
 
 # create empty rows to store new data in
 pulsar_data_out["S_min1_05*area"] = None
@@ -90,25 +78,31 @@ for i, row in pulsar_data_out.iterrows():
 
         # define each constant in the pulsar data as what it is for greater readability
         # Units: none, M_sun, M_sun, none, s, s, s^2, s^2, T, T, Kpc, Kpc, Kpc, Kpc, Kpc, Kpc, km/s, km/s, km/s, km/s, km/s, km/s, mJy Kpc^2, mJy Kpc^2
-        ID, M_1, M_2, P_orb, e, a, P_1, P_2, P_dot1, P_dot2, B_1, B_2, x, y, z, vx, vy, vz, L1, L2 = row['ID'], row['m1(Msun)'], row['m2(Msun)'], row['porb(days)'], row['e'], row['a(AU)'], row['p1(s)'], row['p2(s)'], row['pdot1(s/s)'], row['pdot2(s/s)'], row['b1(T)'], row['b2(T)'], row['x(kpc)'], row['y(kpc)'], row['z(kpc)'], row['vx(km/s)'], row['vy(km/s)'], row['vz(km/s)'], row['l1(mJy kpc²)'], row['l2(mJy kpc²)']
+        ID, M_1, M_2, P_orb, e, a, P_1, P_2, P_dot1, P_dot2, B_1, B_2, x, y, z, vx, vy, vz, L1, L2, type1, type2 = row['ID'], row['m1(Msun)'], row['m2(Msun)'], row['porb(days)'], row['e'], row['a(AU)'], row['p1(s)'], row['p2(s)'], row['pdot1(s/s)'], row['pdot2(s/s)'], row['b1(T)'], row['b2(T)'], row['x(kpc)'], row['y(kpc)'], row['z(kpc)'], row['vx(km/s)'], row['vy(km/s)'], row['vz(km/s)'], row['l1(mJy kpc²)'], row['l2(mJy kpc²)'], row['type1'], row['type2']
 
-        # check to see if each object is a neutron star, if it is not, save values as None, else compute the values
-        if pd.isna(P_1) == True:
+        # get the Bagchi correction of the objects in the system
+        alt_det1, alt_det2 = selection_effects.DNS_NSBH_sel_eff(P1, P2, P_orb1, P_orb2, e, type1, type2)
+
+        # check to make sure that the pulsar is not below the death lines, if it is spin period will be None
+        #P_1 = selection_effects.death_lines(P_1, P_dot1, freq, area, L1)
+        #P_2 = selection_effects.death_lines(P_2, P_dot2, freq, area, L2)
+
+        # check to see if each object is a neutron star and if it is radio detectable, if it is not, save values as None, else compute the values
+        if pd.isna(P_1) == True or pd.isna(alt_det1) == True or alt_det1 == 0:
             S_min1_05, S_min1_27, S_min1_fwhm, flux1, area, f_b1, SNR1_05, SNR1_27, SNR1_fwhm, T_sky = None, None, None, None, None, None, None, None, None, None
         else:
             S_min1_05, S_min1_27, S_min1_fwhm, flux1, area, SNR1_05, SNR1_27, SNR1_fwhm, T_sky = selection_effects.S_min(M_1, P_orb, e, a, P_1, P_dot1, B_1, x, y, z, vx, vy, vz, L1, T_rec, d_f, n_chan, freq, tau_samp, G, t_int)
 
             f_b1 = selection_effects.f_beaming(P_1)
 
+
         # repeat process for second star if the data includes binary systems
-        if pd.isna(P_2) == True:
+        if pd.isna(P_2) == True or pd.isna(alt_det1) == True or alt_det2 == 0:
             S_min2_05, S_min2_27, S_min2_fwhm, flux2, area, f_b2, SNR2_05, SNR2_27, SNR2_fwhm, T_sky = None, None, None, None, None, None, None, None, None, None
         else:
             S_min2_05, S_min2_27, S_min2_fwhm, flux2, area, SNR2_05, SNR2_27, SNR2_fwhm, T_sky = selection_effects.S_min(M_2, P_orb, e, a, P_2, P_dot2, B_2, x, y, z, vx, vy, vz, L2, T_rec, d_f, n_chan, freq, tau_samp, G, t_int)
 
             f_b2 = selection_effects.f_beaming(P_2)
-
-        #alt_det1, alt_det2 = selection_effects.DNS_NSBH_sel_eff(P1, P2, P_orb1, P_orb2, e, sys_type)
 
     else:
         # define each constant in the pulsar data as what it is for greater readability
