@@ -155,7 +155,7 @@ def DNS_NSBH_sel_eff(P1, P2, P_orb, e, type1, type2):
 
     return alt_det1, alt_det2
 
-def death_lines(P, P_dot, freq, area, L):
+def death_lines(P, P_dot, x, y, z, L):
     """
     Determine if the pulsar falls within or outside of the death lines.
 
@@ -163,8 +163,7 @@ def death_lines(P, P_dot, freq, area, L):
     ------
     P, spin period (s)
     P_dot, change in the spin period (s/s)
-    freq, observing frequency (MHz)
-    area, reciever area (m^2) ????
+    x, y, z; cartisian coordinates of the pulsar (kpc)
     L, radio luminosity (mJy)
 
     Returns:
@@ -175,12 +174,14 @@ def death_lines(P, P_dot, freq, area, L):
     # determine if the
     death_line = (10**(0.92 * np.log10(P) - 18.65)) >= P_dot
 
-    R = 12 # km
+    R = 12*1e3 # m
     I = 0.237 * M * (R**2) * (1 + (4.2 * (M/R)) + 90*((M/R)**4))# M_sun m^2 (from Lorimer, D., et. al., Handbook of Pulsar Astronomy)
-    E_dot = 4 * (np.pi**2) * I * P_dot * (P**(-3)) # M_sun m^2 s^-3
+    I = 1.989e43 * I # convert I from M_sun m^2 to grams cm^2
 
-    E_dot = # convert to erg/s
+    E_dot = 4 * (np.pi**2) * I * P_dot * (P**(-3)) # grams cm^2 s^-3
 
+    l, b, d = gal_cart.cart2gal(x, y, z, degree=True)
+    L = 7.4e27*(d**2)*L # convert luminosity to erg/s
 
     # get the radio efficiency of the pulsars
     xi = L/E_dot
