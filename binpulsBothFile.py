@@ -81,7 +81,7 @@ for i, row in pulsar_data_out.iterrows():
         ID, M_1, M_2, P_orb, e, a, P_1, P_2, P_dot1, P_dot2, B_1, B_2, x, y, z, vx, vy, vz, L1, L2, type1, type2 = row['ID'], row['m1(Msun)'], row['m2(Msun)'], row['porb(days)'], row['e'], row['a(AU)'], row['p1(s)'], row['p2(s)'], row['pdot1(s/s)'], row['pdot2(s/s)'], row['b1(T)'], row['b2(T)'], row['x(kpc)'], row['y(kpc)'], row['z(kpc)'], row['vx(km/s)'], row['vy(km/s)'], row['vz(km/s)'], row['l1(mJy kpc²)'], row['l2(mJy kpc²)'], row['type1'], row['type2']
 
         # get the Bagchi correction of the objects in the system
-        alt_det1, alt_det2 = selection_effects.DNS_NSBH_sel_eff(P1, P2, P_orb1, P_orb2, e, type1, type2)
+        alt_det1, alt_det2 = selection_effects.DNS_NSBH_sel_eff(P_1, P_2, P_orb, e, type1, type2)
 
         # check to make sure that the pulsar is not below the death lines, if it is spin period will be None
         #P_1 = selection_effects.death_lines(P_1, P_dot1, freq, area, L1)

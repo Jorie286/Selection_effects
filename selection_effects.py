@@ -97,7 +97,7 @@ def T_sky_fnct(x, y, z, freq):
     T_sky = s.get_temp(freq) # get the temperature from the output, freq units in MHz
     return T_sky
 
-def DNS_NSBH_sel_eff(P1, P2, P_orb1, P_orb2, e, type1, type2):
+def DNS_NSBH_sel_eff(P1, P2, P_orb, e, type1, type2):
     """
     Get the radio detectability cutoff for (Double Neutron Star) DNS and (Neutron Star Black Hole) NSBH systems using the parameters described in Chattopadhyay, D., Stevenson, S., Hurley, J. R., Rossi, L. J., & Flynn, C. 2020, Monthly Notices of the Royal Astronomical Society, 494, 1587, doi: 10.1093/mnras/staa756
 
@@ -105,8 +105,7 @@ def DNS_NSBH_sel_eff(P1, P2, P_orb1, P_orb2, e, type1, type2):
     ------
     P1, spin period of primary object (seconds)
     P2, spin period of secondary object (seconds)
-    P_orb1, orbital period of primary object (days)
-    P_orb2, orbital period of secondary object (days)
+    P_orb1, orbital period (days)
     e, eccentricity of the binary systems
     type1, the type of the first object
     type2, the type of the second object
