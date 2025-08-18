@@ -105,7 +105,7 @@ def DNS_NSBH_sel_eff(P1, P2, P_orb, e, type1, type2):
     ------
     P1, spin period of primary object (seconds)
     P2, spin period of secondary object (seconds)
-    P_orb1, orbital period (days)
+    P_orb, orbital period (days)
     e, eccentricity of the binary systems
     type1, the type of the first object
     type2, the type of the second object
@@ -131,8 +131,8 @@ def DNS_NSBH_sel_eff(P1, P2, P_orb, e, type1, type2):
             m = (m_m * e) + c_m
             c = (m_c * e) + c_c
 
-            alt_det1 = (P_orb >= (m * P1) + c).astype(int)
-            alt_det2 = (P_orb >= (m * P2) + c).astype(int)
+            alt_det1 = int(P_orb >= (m * P1) + c)
+            alt_det2 = int(P_orb >= (m * P2) + c)
 
 
         else: # the only other system possible is a neutron star black hole system, compute if not a white dwarf neutron star system or a double neutron star system
@@ -146,8 +146,8 @@ def DNS_NSBH_sel_eff(P1, P2, P_orb, e, type1, type2):
             m = (m_m * e) + c_m
             c = (m_c * e) + c_c
 
-            alt_det1 = (P_orb >= (m * P1) + c).astype(int)
-            alt_det2 = (P_orb >= (m * P2) + c).astype(int)
+            alt_det1 = int(P_orb >= (m * P1) + c)
+            alt_det2 = int(P_orb >= (m * P2) + c)
 
     else: # if the system does contain a white dwarf, don't get the radio detectability
         alt_det1=None
