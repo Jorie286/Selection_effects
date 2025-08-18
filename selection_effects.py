@@ -155,7 +155,7 @@ def DNS_NSBH_sel_eff(P1, P2, P_orb, e, type1, type2):
 
     return alt_det1, alt_det2
 
-def death_lines(P, P_dot, x, y, z, L):
+def death_lines(P, P_dot, M, x, y, z, L):
     """
     Determine if the pulsar falls within or outside of the death lines.
 
@@ -163,6 +163,7 @@ def death_lines(P, P_dot, x, y, z, L):
     ------
     P, spin period (s)
     P_dot, change in the spin period (s/s)
+    M, mass of the pusar (M_sun)
     x, y, z; cartisian coordinates of the pulsar (kpc)
     L, radio luminosity (mJy)
 

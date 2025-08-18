@@ -81,8 +81,8 @@ for i, row in pulsar_data_out.iterrows():
         ID, M_1, M_2, P_orb, e, a, P_1, P_2, P_dot1, P_dot2, B_1, B_2, x, y, z, vx, vy, vz, L1, L2, type1, type2 = row['ID'], row['m1(Msun)'], row['m2(Msun)'], row['porb(days)'], row['e'], row['a(AU)'], row['p1(s)'], row['p2(s)'], row['pdot1(s/s)'], row['pdot2(s/s)'], row['b1(T)'], row['b2(T)'], row['x(kpc)'], row['y(kpc)'], row['z(kpc)'], row['vx(km/s)'], row['vy(km/s)'], row['vz(km/s)'], row['l1(mJy kpc²)'], row['l2(mJy kpc²)'], row['type1'], row['type2']
 
         # check to make sure that the pulsar is not below the death lines, if it is spin period will be None
-        P_1 = selection_effects.death_lines(P_1, P_dot1, x, y, z, L1)
-        P_2 = selection_effects.death_lines(P_2, P_dot2, x, y, z, L2)
+        P_1 = selection_effects.death_lines(P_1, P_dot1, M_1, x, y, z, L1)
+        P_2 = selection_effects.death_lines(P_2, P_dot2, M_2, x, y, z, L2)
 
         # check to see if each object is a neutron star and if it is radio detectable, if it is not, save values as None, else compute the values
         if pd.isna(P_1) == True:
@@ -108,6 +108,9 @@ for i, row in pulsar_data_out.iterrows():
         # define each constant in the pulsar data as what it is for greater readability
         # Units: none, M_sun, none, s, s^2, T, Kpc, Kpc, Kpc, km/s, km/s, km/s, mJy Kpc^2
         ID, M_1, P_orb, e, a, P_1, P_dot1, B_1, x, y, z, vx, vy, vz, L1 = row['ID'], row['m1(Msun)'], row['porb(days)'], row['e'], row['a'], row['p1(s)'], row['pdot1(s/s)'], row['b1(T)'], row['x(kpc)'], row['y(kpc)'], row['z(kpc)'], row['vx(km/s)'], row['vy(km/s)'], row['vz(km/s)'], row['l1(mJy kpc²)']
+
+        # check to make sure that the pulsar is not below the death lines, if it is spin period will be None
+        P_1 = selection_effects.death_lines(P_1, P_dot1, x, y, z, L1)
 
         # check to see if each object is a neutron star, if it is not, save values as None, else compute the values
         if pd.isna(P_1) == True:
