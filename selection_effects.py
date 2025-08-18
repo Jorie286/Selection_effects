@@ -175,11 +175,11 @@ def death_lines(P, P_dot, freq, area, L):
     # determine if the
     death_line = (10**(0.92 * np.log10(P) - 18.65)) >= P_dot
 
-    # DEBATRI: What is the moment of interia (I) here?
-    I = 1e38 # kg m^2 (from Lorimer, D., et. al., Handbook of Pulsar Astronomy)
-    E_dot = 4 * (np.pi**2) * I * P_dot * (P**(-3)) # Watts
-    E_dot = 1e26 * (E_dot/(area * (1e6*freq))) # convert E_dot to Jy
-    E_dot = E_dot*1e3 # convert E_dot to mJy to match with L
+    R = 12 # km
+    I = 0.237 * M * (R**2) * (1 + (4.2 * (M/R)) + 90*((M/R)**4))# M_sun m^2 (from Lorimer, D., et. al., Handbook of Pulsar Astronomy)
+    E_dot = 4 * (np.pi**2) * I * P_dot * (P**(-3)) # M_sun m^2 s^-3
+
+    E_dot = # convert to erg/s
 
 
     # get the radio efficiency of the pulsars
@@ -308,6 +308,6 @@ def f_beaming(P):
     """
 
     # beaming fraction model, P must be entered in seconds
-    f_b = 0.09*((np.log10(P.clip(1e-10)/10))**2)+0.03
+    f_b = 0.09*((np.log10(P/10))**2)+0.03
 
     return f_b
