@@ -117,6 +117,7 @@ def DNS_NSBH_sel_eff(P1, P2, P_orb, e, type1, type2):
     """
 
     # check to see that neither object in the system is white dwarf; if not, compute radio detectability, else return None for both values
+
     if type1 != 10 or type1 != 11 or type1 != 12 or type2 != 10 or type2 != 11 or type2 != 12 or type1.lower().find("wd") == -1 or type2.lower().find("wd") == -1:
 
         # check for a double neutron star system
@@ -169,7 +170,7 @@ def death_lines(P, P_dot, M, x, y, z, L):
 
     Returns:
     --------
-    P, original spin period if above death lines or None if below death lines
+    det, 0 if below death lines, 1 if above
     """
 
     # determine if the
@@ -191,10 +192,11 @@ def death_lines(P, P_dot, M, x, y, z, L):
 
     # check the death line and radio efficieny of the pulsar, if it has stopped emitting, set P_1 to None
     if death_line == True or xi >= xi_max:
-        P = None
+        det = 0
+    else:
+        det = 1
 
-    # Return the changed (or unchanged) value of P so we know what pulsar are below the death lines, don't calculate selection effects for these
-    return P
+    return det
 
 def flux(L, x, y, z):
     """
@@ -242,14 +244,14 @@ def S_min(M, P_orb, e, a, P, P_dot, B, x, y, z, vx, vy, vz, L, T_rec, d_f, n_cha
         beta, parameter to account for the errors that increase the noise in the signal (automatically set to 1)
 
     Returns:
-        S_min_05, S_min_27, S_min_fwhm; the lower limit of flux a simulated pulsar can have to be detected at a given S/N ratio (mJy) for three different functions of W_i
+        S_min, the lower limit of flux a simulated pulsar can have to be detected at a given S/N ratio (mJy)
         F, flux (mJy)
         D, distance (Kpc)
-        SNR_05, SNR_27, SNR_fwhm; the signal to noise ratio of the pulsar data for three different functions of W_i
+        SNR; the signal to noise ratio of the pulsar data
         T_sky, sky temperature (Kelvin)
         DM, dispersion measure (pc cm^-3)
         DM_0, diagonal dispersion measure (pc cm^-3)
-        We_05, We_27, We_fwhm; effective pulse width for different intrinsic pulse widths (seconds)
+        We, effective pulse width (seconds)
     """
 
     DM, tau_sc = DM_fnct(x, y, z, freq) # dispersion measure in the direction of the pulsar, Units: pc/cm^3, seconds
@@ -262,42 +264,27 @@ def S_min(M, P_orb, e, a, P, P_dot, B, x, y, z, vx, vy, vz, L, T_rec, d_f, n_cha
 
     F, D, Area = flux(L, x, y, z) # get the flux of the pulsar, Units: F (mJy), D (Kpc), Area (Kpc^2)
 
-    # the three equations for W_i come from:
-        # fixed duty cycle in DNS paper, list index 0
-        # inside C code comment; from https://iopscience.iop.org/article/10.3847/1538-4357/ab75e2/pdf, list index 1
-        # from C code, list index 2
-    FWHM = 0.04
-    Wi_list = [P*0.05, (P**0.27)*0.05, FWHM*P]
-    S_min_list = []
-    SNR_list = []
+    Wi = P*0.05
 
-    for W_i in Wi_list:
-        # compute the effective pulse width
-        We = np.sqrt(W_i**2 + tau_samp**2 + (tau_samp*(DM/DM_0))**2 + tau_scatt**2) # Units: seconds
+    # compute the effective pulse width
+    We = np.sqrt(W_i**2 + tau_samp**2 + (tau_samp*(DM/DM_0))**2 + tau_scatt**2) # Units: seconds
 
-        if We>=P:
-            S_min = 9.99e9
-        else:
-            # compute the minimum flux (S_min)
-            S_min = beta*((SNmin*(T_rec+T_sky))/((G*1e3)*np.sqrt(npol*t_int*(d_f/1e6))))*np.sqrt(We/(P-We)) # units: mJy
+    if We>=P:
+        S_min = 9.99e9
+    else:
+        # compute the minimum flux (S_min)
+        S_min = beta*((SNmin*(T_rec+T_sky))/((G*1e3)*np.sqrt(npol*t_int*(d_f/1e6))))*np.sqrt(We/(P-We)) # units: mJy
 
-        S_min_list.append(S_min) # add each calculated S_min to the list
 
-        # get the S/N ratio of the pulsar data
-        npol = 2
-        if We >= P:
-            SNR = 0
-        else:
-            SNR = F / np.sqrt(np.pi / 2) / np.sqrt(We / (P - We)) / (T_rec + T_sky) * (G * np.sqrt(npol * d_f * t_int))
-        SNR_list.append(SNR)
+    # get the S/N ratio of the pulsar data
+    npol = 2
+    if We >= P:
+        SNR = 0
+    else:
+        SNR = F / np.sqrt(np.pi / 2) / np.sqrt(We / (P - We)) / (T_rec + T_sky) * (G * np.sqrt(npol * d_f * t_int))
 
-    # get each S_min from the list
-    S_min_05, S_min_27, S_min_fwhm = S_min_list
 
-    # get each SNR from the list
-    SNR_05, SNR_27, SNR_fwhm = SNR_list
-
-    return S_min_05, S_min_27, S_min_fwhm, F, Area, SNR_05, SNR_27, SNR_fwhm, T_sky
+    return S_min, F, Area, SNR, T_sky
 
 def f_beaming(P):
     """
