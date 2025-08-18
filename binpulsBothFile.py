@@ -114,7 +114,7 @@ for i, row in pulsar_data_out.iterrows():
 
     # get the galacitc coordinates of the object
     l, b, d = gal_cart.cart2gal(x, y, z, degree=True)
-    if s[-1](l, b) == 1: # check to see if the pulsar is within the survey's viewing area. If it is, save the info.
+    if s[-1](l, b) == 1 and pd.isna(S_min1)==False and pd.isna(S_min1)==False and pd.isna(area)==False and pd.isna(T_sky)==False and pd.isna(f_b1)==False and pd.isna(f_b2)==False and pd.isna(SNR1)==False and pd.isna(SNR2)==False: # check to see if the pulsar is within the survey's viewing area. If it is, save the info.
         pulsar_data_out.loc[i, "S_min1*area"] = S_min1*area
         pulsar_data_out.loc[i, "S_min2*area"] = S_min2*area
         pulsar_data_out.loc[i, "Area"] = area
