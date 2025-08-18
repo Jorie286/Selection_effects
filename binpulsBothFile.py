@@ -74,7 +74,7 @@ for i, row in pulsar_data_out.iterrows():
         det2d = selection_effects.death_lines(P_2, P_dot2, M_2, x, y, z, L2)
 
         # check to see if each object is a neutron star and if it is radio detectable, if it is not, save values as None, else compute the values
-        if pd.isna(P_1) == True or det1==0:
+        if pd.isna(P_1) == True or det1b==0 or det1d==0:
             S_min1, flux1, area, f_b1, SNR1, T_sky = None, None, None, None, None, None
         else:
             S_min1, flux1, area, SNR1, T_sky = selection_effects.S_min(M_1, P_orb, e, a, P_1, P_dot1, B_1, x, y, z, vx, vy, vz, L1, T_rec, d_f, n_chan, freq, tau_samp, G, t_int)
@@ -83,7 +83,7 @@ for i, row in pulsar_data_out.iterrows():
 
 
         # repeat process for second star if the data includes binary systems
-        if pd.isna(P_2) == True or det2==0:
+        if pd.isna(P_2) == True or det2b==0 or det2d==0:
             S_min2, flux2, area, f_b2, SNR2, T_sky = None, None, None, None, None, None
         else:
             S_min2, flux2, area, SNR2, T_sky = selection_effects.S_min(M_2, P_orb, e, a, P_2, P_dot2, B_2, x, y, z, vx, vy, vz, L2, T_rec, d_f, n_chan, freq, tau_samp, G, t_int)
@@ -101,7 +101,7 @@ for i, row in pulsar_data_out.iterrows():
         det1d = selection_effects.death_lines(P_1, P_dot1, x, y, z, L1)
 
         # check to see if each object is a neutron star, if it is not, save values as None, else compute the values
-        if pd.isna(P_1) == True or det1==0:
+        if pd.isna(P_1) == True or det1b==0 or det1d==0:
             S_min1, flux1, area, f_b1, SNR1, T_sky = None, None, None, None, None, None
         else:
             S_min1, flux1, area, SNR1, T_sky = selection_effects.S_min(M_1, P_orb, e, a, P_1, P_dot1, B_1, x, y, z, vx, vy, vz, L1, T_rec, d_f, n_chan, freq, tau_samp, G, t_int)
