@@ -128,12 +128,15 @@ def DNS_NSBH_sel_eff(P1, P2, P_orb, e, type1, type2):
             c_m= -27.68
             m_c= -3.40
             c_c= 5.72
-            print(m_m)
+
             m = (m_m * e) + c_m
             c = (m_c * e) + c_c
 
-            alt_det1 = int(P_orb >= (m * P1) + c)
-            alt_det2 = int(P_orb >= (m * P2) + c)
+            P_cut1 = (m * P1) + c
+            P_cut2 = (m * P2) + c
+
+            alt_det1 = int(P_orb > P_cut1)
+            alt_det2 = int(P_orb > P_cut2)
 
 
         else: # the only other system possible is a neutron star black hole system, compute if not a white dwarf neutron star system or a double neutron star system
@@ -143,12 +146,15 @@ def DNS_NSBH_sel_eff(P1, P2, P_orb, e, type1, type2):
             c_m= -18.31
             m_c= -2.53
             c_c= 4.51
-            print(m_m)
+
             m = (m_m * e) + c_m
             c = (m_c * e) + c_c
 
-            alt_det1 = int(P_orb >= (m * P1) + c)
-            alt_det2 = int(P_orb >= (m * P2) + c)
+            P_cut1 = (m * P1) + c
+            P_cut2 = (m * P2) + c
+
+            alt_det1 = int(P_orb > P_cut1)
+            alt_det2 = int(P_orb > P_cut2)
 
     else: # if the system does contain a white dwarf, don't get the radio detectability
         alt_det1=None
@@ -173,7 +179,7 @@ def death_lines(P, P_dot, M, x, y, z, L):
     det, 0 if below death lines, 1 if above
     """
 
-    # determine if the
+    # get the value of Pdot at the death line for the given period
     death_line = (10**(0.92 * np.log10(P) - 18.65)) >= P_dot
 
     R = 12*1e3 # m
