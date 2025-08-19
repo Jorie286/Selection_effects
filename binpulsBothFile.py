@@ -68,6 +68,8 @@ for i, row in pulsar_data_out.iterrows():
 
         # get the Bagchi correction of the objects in the system
         #det1b, det2b = selection_effects.DNS_NSBH_sel_eff(P_1, P_2, P_orb, e, type1, type2)
+        det1b=1
+        det2b=1
 
         # check to make sure that the pulsar is not below the death lines, if it is spin period will be None
         det1d = selection_effects.death_lines(P_1, P_dot1, M_1, x, y, z, L1)
