@@ -30,7 +30,7 @@ mu_0 = 1.256e-6 # m kg s^-2 A^-2
 I_1 = 0.237 * M_1 * (R**2) * 1.989e30* (1 + (4.2 * (M_1/R)) + 90*((M_1/R)**4))# kg m^2 (from Lorimer, D., et. al., Handbook of Pulsar Astronomy)
 I_2 = 0.237 * M_2 * (R**2) * 1.989e30* (1 + (4.2 * (M_2/R)) + 90*((M_2/R)**4))# kg m^2 (from Lorimer, D., et. al., Handbook of Pulsar Astronomy)
 
-alpha = 30*(np.pi/180)
+alpha = 30*(np.pi/180) # set the angle between rotation axis and magnetic axis to 30 degrees
 
 omega_dot_1 = - (8*np.pi*(B_1**2)*(R**6)*((omega_spin_1 * yr_to_sec)**3)*(np.sin(alpha))**2) / (3*mu_0*(2.99e8**3)*I_1)
 omega_dot_2 = - (8*np.pi*(B_2**2)*(R**6)*((omega_spin_2 * yr_to_sec)**3)*(np.sin(alpha))**2) / (3*mu_0*(2.99e8**3)*I_2)
@@ -55,7 +55,7 @@ L1 = L1 * L_sun_to_mJykpc
 L2 = L2 * L_sun_to_mJykpc
 
 # make a list of null ID values to satisfy requirement in selection_effects.py
-ID = np.zeros(np.shape(M_1))
+ID = np.arange(0, len(M_1), 1)
 
 
 # make a new dataframe to store the updated values that can be read directly into the selection effects code
