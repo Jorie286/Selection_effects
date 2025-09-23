@@ -180,7 +180,7 @@ def death_lines(P, P_dot, M, x, y, z, L):
     """
 
     # get the value of Pdot at the death line for the given period
-    death_line = (10**(0.92 * np.log10(P) - 18.65)) >= P_dot
+    death_line = ((10**(0.92 * np.log10(P) - 18.65)) >= P_dot)
 
     R = 12*1e3 # m
     I = 0.237 * M * (R**2) * (1 + (4.2 * (M/R)) + 90*((M/R)**4))# M_sun m^2 (from Lorimer, D., et. al., Handbook of Pulsar Astronomy)
@@ -197,7 +197,7 @@ def death_lines(P, P_dot, M, x, y, z, L):
     xi_max = 0.01
 
     # check the death line and radio efficieny of the pulsar, if it has stopped emitting, set P_1 to None
-    if death_line == True or xi >= xi_max:
+    if death_line == True or xi > xi_max:
         det = 0
     else:
         det = 1
