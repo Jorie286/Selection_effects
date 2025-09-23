@@ -10,8 +10,9 @@ table = pd.read_hdf("NSNS_sources.h5", "final_bpp")
 M_1, M_2, P_orb, e, a, omega_spin_1, omega_spin_2, B_1, B_2, x, y, z, vx, vy, vz, L1, L2, type1, type2 = table["mass_1"], table["mass_2"], table["porb"], table["ecc"], table["sep"], table["omega_spin_1"], table["omega_spin_2"], table["B_1"], table["B_2"], table["x"], table["y"], table["z"], table["v_x"], table["v_y"], table["v_z"], table["lum_1"], table["lum_2"], table["kstar_1"], table["kstar_2"]
 
 
-
 # correcting units:
+# x, y, z, vx, vy, vz; should already be in kpc, km/s
+
 R_sun_to_AU = 6.9599e8 / 1.4960e11
 a = a*R_sun_to_AU # a given in R_sun, multiply by (R_sun to m)/(m to AU)
 
@@ -43,16 +44,6 @@ Gauss_to_Tesla = 1/1e4
 
 B_1 = B_1*Gauss_to_Tesla
 B_2 = B_2*Gauss_to_Tesla
-
-
-# not sure about the units for x, y, z, vx, vy, vz; I would guess R_sun and R_sun/yr???
-# put distance and velocity coordinates in to the proper units
-R_sun_to_kpc = 6.96e8/(3.0857e16 * 1e3)
-R_sunyr_to_kms = (6.96e8/1e3) / yr_to_sec
-
-x, y, z = x*R_sun_to_kpc, y*R_sun_to_kpc, z*R_sun_to_kpc
-vx, vy, vz = vx*R_sunyr_to_kms, vy*R_sunyr_to_kms, vz*R_sunyr_to_kms
-
 
 # convert L_sun to mJy kpc^2
 L_sun_to_mJykpc = []
