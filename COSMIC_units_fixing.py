@@ -19,8 +19,8 @@ a = a*R_sun_to_AU # a given in R_sun, multiply by (R_sun to m)/(m to AU)
 
 # get the period from the angular velocity
 yr_to_sec = 365.25*24*60*60 # conversion factor from years to seconds
-P_1 = (2*np.pi)/(omega_spin_1/yr_to_sec) # convert angular velocity to period, seconds
-P_2 = (2*np.pi)/(omega_spin_2/yr_to_sec)
+P_1 = (2*np.pi) / (omega_spin_1 / yr_to_sec) # convert angular velocity to period, seconds
+P_2 = (2*np.pi) / (omega_spin_2 / yr_to_sec)
 
 
 # get pdot using the period and other parameters
@@ -32,8 +32,8 @@ I_2 = 0.237 * M_2 * (R**2) * 1.989e30* (1 + (4.2 * (M_2/R)) + 90*((M_2/R)**4))# 
 
 alpha = 30*(np.pi/180) # set the angle between rotation axis and magnetic axis to 30 degrees
 
-omega_dot_1 = - (8*np.pi*(B_1**2)*(R**6)*((omega_spin_1 * yr_to_sec)**3)*(np.sin(alpha))**2) / (3*mu_0*(2.99e8**3)*I_1)
-omega_dot_2 = - (8*np.pi*(B_2**2)*(R**6)*((omega_spin_2 * yr_to_sec)**3)*(np.sin(alpha))**2) / (3*mu_0*(2.99e8**3)*I_2)
+omega_dot_1 = - (8*np.pi*(B_1**2)*(R**6)*((omega_spin_1 / yr_to_sec)**3)*(np.sin(alpha))**2) / (3*mu_0*(2.99e8**3)*I_1)
+omega_dot_2 = - (8*np.pi*(B_2**2)*(R**6)*((omega_spin_2 / yr_to_sec)**3)*(np.sin(alpha))**2) / (3*mu_0*(2.99e8**3)*I_2)
 
 Pdot_1 = - (omega_dot_1 * P_1)/(omega_spin_1 * yr_to_sec)
 Pdot_2 = - (omega_dot_2 * P_2)/(omega_spin_2 * yr_to_sec)
