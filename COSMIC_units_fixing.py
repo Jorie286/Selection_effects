@@ -35,8 +35,8 @@ alpha = 30*(np.pi/180) # set the angle between rotation axis and magnetic axis t
 omega_dot_1 = - (8*np.pi*(B_1**2)*(R**6)*((omega_spin_1 / yr_to_sec)**3)*(np.sin(alpha))**2) / (3*mu_0*(2.99e8**3)*I_1)
 omega_dot_2 = - (8*np.pi*(B_2**2)*(R**6)*((omega_spin_2 / yr_to_sec)**3)*(np.sin(alpha))**2) / (3*mu_0*(2.99e8**3)*I_2)
 
-Pdot_1 = - (omega_dot_1 * P_1)/(omega_spin_1 * yr_to_sec)
-Pdot_2 = - (omega_dot_2 * P_2)/(omega_spin_2 * yr_to_sec)
+Pdot_1 = - (omega_dot_1 * P_1)/(omega_spin_1 / yr_to_sec)
+Pdot_2 = - (omega_dot_2 * P_2)/(omega_spin_2 / yr_to_sec)
 
 
 # convert magnetic field in Gauss to Tesla
