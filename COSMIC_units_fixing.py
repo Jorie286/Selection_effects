@@ -19,8 +19,8 @@ a = a*R_sun_to_AU # a given in R_sun, multiply by (R_sun to m)/(m to AU)
 
 # get the period from the angular velocity
 yr_to_sec = 365.25*24*60*60 # conversion factor from years to seconds
-P_1 = (2*np.pi)/(omega_spin_1*yr_to_sec) # convert angular velocity to period, seconds
-P_2 = (2*np.pi)/(omega_spin_2*yr_to_sec)
+P_1 = (2*np.pi)/(omega_spin_1/yr_to_sec) # convert angular velocity to period, seconds
+P_2 = (2*np.pi)/(omega_spin_2/yr_to_sec)
 
 
 # get pdot using the period and other parameters
