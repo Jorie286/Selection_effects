@@ -290,7 +290,7 @@ def S_min(M, P_orb, e, a, P, P_dot, B, x, y, z, vx, vy, vz, L, T_rec, d_f, n_cha
         SNR = F / np.sqrt(np.pi / 2) / np.sqrt(We / (P - We)) / (T_rec + T_sky) * (G * np.sqrt(npol * d_f * t_int))
 
 
-    return S_min, F, Area, SNR, T_sky
+    return S_min, F, Area, SNR, T_sky, DM
 
 def f_beaming(P):
     """

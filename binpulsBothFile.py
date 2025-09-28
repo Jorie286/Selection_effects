@@ -79,7 +79,7 @@ for i, row in pulsar_data_out.iterrows():
         if pd.isna(P_1) == True or det1b==0 or det1d==0:
             S_min1, flux1, area, f_b1, SNR1, T_sky = None, None, None, None, None, None
         else:
-            S_min1, flux1, area, SNR1, T_sky = selection_effects.S_min(M_1, P_orb, e, a, P_1, P_dot1, B_1, x, y, z, vx, vy, vz, L1, T_rec, d_f, n_chan, freq, tau_samp, G, t_int)
+            S_min1, flux1, area, SNR1, T_sky, DM = selection_effects.S_min(M_1, P_orb, e, a, P_1, P_dot1, B_1, x, y, z, vx, vy, vz, L1, T_rec, d_f, n_chan, freq, tau_samp, G, t_int)
 
             f_b1 = selection_effects.f_beaming(P_1)
 
@@ -88,7 +88,7 @@ for i, row in pulsar_data_out.iterrows():
         if pd.isna(P_2) == True or det2b==0 or det2d==0:
             S_min2, flux2, area, f_b2, SNR2, T_sky = None, None, None, None, None, None
         else:
-            S_min2, flux2, area, SNR2, T_sky = selection_effects.S_min(M_2, P_orb, e, a, P_2, P_dot2, B_2, x, y, z, vx, vy, vz, L2, T_rec, d_f, n_chan, freq, tau_samp, G, t_int)
+            S_min2, flux2, area, SNR2, T_sky, DM = selection_effects.S_min(M_2, P_orb, e, a, P_2, P_dot2, B_2, x, y, z, vx, vy, vz, L2, T_rec, d_f, n_chan, freq, tau_samp, G, t_int)
 
             f_b2 = selection_effects.f_beaming(P_2)
 
@@ -106,7 +106,7 @@ for i, row in pulsar_data_out.iterrows():
         if pd.isna(P_1) == True or det1b==0 or det1d==0:
             S_min1, flux1, area, f_b1, SNR1, T_sky = None, None, None, None, None, None
         else:
-            S_min1, flux1, area, SNR1, T_sky = selection_effects.S_min(M_1, P_orb, e, a, P_1, P_dot1, B_1, x, y, z, vx, vy, vz, L1, T_rec, d_f, n_chan, freq, tau_samp, G, t_int)
+            S_min1, flux1, area, SNR1, T_sky, DM = selection_effects.S_min(M_1, P_orb, e, a, P_1, P_dot1, B_1, x, y, z, vx, vy, vz, L1, T_rec, d_f, n_chan, freq, tau_samp, G, t_int)
 
             f_b1 = selection_effects.f_beaming(P_1)
 
@@ -135,6 +135,7 @@ for i, row in pulsar_data_out.iterrows():
         pulsar_data_out.loc[i, "det2"] = det2
         pulsar_data_out.loc[i, "SNR1"] = SNR1
         pulsar_data_out.loc[i, "SNR2"] = SNR2
+        pulsar_data_out.loc[i, "DM"] = DM
 
 # save the updated pulsar data to two new csv files
 pulsar_data_out.to_csv(str(output_name), index=False, sep=";")
