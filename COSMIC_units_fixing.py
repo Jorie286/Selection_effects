@@ -12,6 +12,7 @@ M_1, M_2, P_orb, e, a, omega_spin_1, omega_spin_2, B_1, B_2, x, y, z, vx, vy, vz
 
 # correcting units:
 # x, y, z, vx, vy, vz; should already be in kpc, km/s
+x = -x # convert astropy coordinates to galpy coordinates which are used in the selection effects
 
 R_sun_to_AU = 6.9599e8 / 1.4960e11
 a = a*R_sun_to_AU # a given in R_sun, multiply by (R_sun to m)/(m to AU)
