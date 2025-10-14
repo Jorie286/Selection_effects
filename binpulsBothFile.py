@@ -128,14 +128,14 @@ for i, row in pulsar_data_out.iterrows():
         pulsar_data_out.loc[i, "S_min1*area"] = S_min1*area
         pulsar_data_out.loc[i, "S_min2*area"] = S_min2*area
         pulsar_data_out.loc[i, "Area"] = area
-        pulsar_data_out.loc[i, "T_sky"] = T_sky
+        #pulsar_data_out.loc[i, "T_sky"] = T_sky
         pulsar_data_out.loc[i, "f_beaming1"] = f_b1
         pulsar_data_out.loc[i, "f_beaming2"] = f_b2
         pulsar_data_out.loc[i, "det1"] = det1
         pulsar_data_out.loc[i, "det2"] = det2
-        pulsar_data_out.loc[i, "SNR1"] = SNR1
-        pulsar_data_out.loc[i, "SNR2"] = SNR2
-        pulsar_data_out.loc[i, "DM"] = DM
+        #pulsar_data_out.loc[i, "SNR1"] = SNR1
+        #pulsar_data_out.loc[i, "SNR2"] = SNR2
+        #pulsar_data_out.loc[i, "DM"] = DM
 
 # save the updated pulsar data to two new csv files
 pulsar_data_out.to_csv(str(output_name), index=False, sep=";")
