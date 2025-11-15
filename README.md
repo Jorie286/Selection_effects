@@ -8,9 +8,7 @@ $\verb|python binpulsBothFile.py survey_name input.dat system_type output.dat|$
 
 Replace the survey_name with one listed in the avaliable surveys below. The input.dat file and output.dat file should be changed to the dat files that you want to use as the input and the one you want the output written to. The system_type should be changed to binary if you are using an input file that contains data from binary pulsar systems. Otherwise, it will assume you are using a single star system.
 
-The code automatically impliments a soft cutoff of pulsar death lines.. . . (add more info)
-
-The pipeline impliments Bagchi correction (Bagchi, M., Lorimer, D. R., & Wolfe, S. 2013, Monthly Notices of the Royal Astronomical Society, 432, 1303–1314, doi: 10.1093/mnras/stt559) based on the objects in the system. . .. . (add more info)
+The code automatically impliments a soft cutoff of pulsar death lines and the radiometer equation to get the luminosity cutoff. It calculates the beaming fraction of the pulsar to get a better idea of the detectability of the pulsar. The pipeline impliments the correction for binary orbits given by Bagchi (Bagchi, M., et. al. 2013) based on the objects in the system and their orbital eccentricities.
 
 The script will return the output file when it finishes running. This file will include the following new columns for each star or each star in the binary system:
 - minimum observable luminosity (S_min1, S_min2)
@@ -62,3 +60,4 @@ The repositories and versions that are required to run this code include:
 - pygedm 3.3.0
 - scipy 1.13.1
 - skytempy (necessary files included in a folder within the repository)
+
