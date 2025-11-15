@@ -64,4 +64,4 @@ new = {"ID":ID, "m1(Msun)":M_1, "m2(Msun)":M_2, "porb(days)":P_orb, "e":e, "a(AU
 
 new_dataframe = pd.DataFrame(data = new)
 
-new_dataframe.to_csv("COSMIC_converted.dat", index=False, sep=";")
+new_dataframe.to_csv("units_converted.dat", index=False, sep=";")
