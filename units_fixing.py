@@ -3,7 +3,7 @@ import numpy as np
 
 import gal_cart
 
-# read in the COSMIC output
+# read in the output
 table = pd.read_hdf("NSNS_sources.h5", "final_bpp")
 
 # read in all the necessary table info
