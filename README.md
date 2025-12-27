@@ -11,15 +11,13 @@ Replace the survey_name with one listed in the avaliable surveys below. The inpu
 The code automatically impliments a soft cutoff of pulsar death lines and the radiometer equation to get the luminosity cutoff. It calculates the beaming fraction of the pulsar to get a better idea of the detectability of the pulsar. The pipeline impliments the correction for binary orbits given by Bagchi (Bagchi, M., et. al. 2013) based on the objects in the system and their orbital eccentricities.
 
 The script will return the output file when it finishes running. This file will include the following new columns for each star or each star in the binary system:
-- minimum observable luminosity (S_min1, S_min2)
+- minimum observable luminosity (S_min1*area, S_min2*area)
 - area (Area)
-- sky temperature (T_sky)
 - binary varible determining if the star was detected (without considering the beaming fraction) (det1, det2)
 - beaming fraction (f_beaming1, f_beaming2)
-- signal to noise ratio (SNR1, SNR2)
 
-The units used within the code are:
-- Dispersion Measure: pc cm^-3 (???)
+Unless otherwise stated, the units used within the code are:
+- Dispersion Measure: pc cm^-3
 - Distance: Kpc
 - Frequency: MHz
 - Flux: mJy
@@ -39,7 +37,7 @@ The surveys that are available to test for a pulsar's detectability include:
 - Parkes_Multi_Beam_ALLSKY
 - Parkes_Multi_Beam_part
 - MeerKat
-- SKA_2100 (t_int = 2100 s)
+- SKA_2100    (t_int = 2100 s)
 - MeerKat_GalPl
 - MeerKat_tint
 - MeerKat_Galpl_tint
@@ -47,7 +45,7 @@ The surveys that are available to test for a pulsar's detectability include:
 - TRUMP_Meer
 - MeerKat
 - MeerKat
-- SKA_300 (t_int = 300 s)
+- SKA_300    (t_int = 300 s)
 
 The repositories and versions that are required to run this code include:
 - astropy 6.1.3
@@ -60,4 +58,5 @@ The repositories and versions that are required to run this code include:
 - pygedm 3.3.0
 - scipy 1.13.1
 - skytempy (necessary files included in a folder within the repository)
+
 
