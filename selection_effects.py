@@ -118,10 +118,10 @@ def DNS_NSBH_sel_eff(P1, P2, P_orb, e, type1, type2):
 
     # check to see that neither object in the system is white dwarf; if not, compute radio detectability, else return None for both values
 
-    if type1 != 10 or type1 != 11 or type1 != 12 or type2 != 10 or type2 != 11 or type2 != 12 or type1.lower().find("wd") == -1 or type2.lower().find("wd") == -1:
+    if type1 != 10 or type1 != 11 or type1 != 12 or type2 != 10 or type2 != 11 or type2 != 12 or str(type1).lower().find("wd") == -1 or str(type2).lower().find("wd") == -1:
 
         # check for a double neutron star system
-        if (type1 == 13 and type2 == 13) or (type1.lower().find("ns") != -1 and type2.lower().find("ns") != -1):
+        if (type1 == 13 and type2 == 13) or (str(type1).lower().find("ns") != -1 and str(type2).lower().find("ns") != -1):
 
             # constants from linear regression fitting with both neutron stars of mass 1.4 M_sun, 1000 s observations and 60 degree orbital inclination
             m_m = -8.90
