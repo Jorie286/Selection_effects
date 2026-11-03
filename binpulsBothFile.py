@@ -50,13 +50,13 @@ pulsar_data_out = p.copy()
 pulsar_data_out["S_min1*area"] = None
 pulsar_data_out["S_min2*area"] = None
 pulsar_data_out["Area"] = None
-pulsar_data_out["T_sky"] = None
+# pulsar_data_out["T_sky"] = None
 pulsar_data_out["f_beaming1"] = None
 pulsar_data_out["f_beaming2"] = None
 pulsar_data_out["det1"] = None
 pulsar_data_out["det2"] = None
-pulsar_data_out["SNR1"] = None
-pulsar_data_out["SNR2"] = None
+# pulsar_data_out["SNR1"] = None
+# pulsar_data_out["SNR2"] = None
 
 # iterate through each row of the simulated pulsar data and determine if the pulsar is detectable
 for i, row in pulsar_data_out.iterrows():
